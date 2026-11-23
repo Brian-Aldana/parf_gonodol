@@ -1,0 +1,83 @@
+# ==========================================
+# Entornos Virtuales y Dependencias Python
+# ==========================================
+.venv/
+venv/
+env/
+ENV/
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+
+# ==========================================
+# Herramientas de Test y Cobertura (Python)
+# ==========================================
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+.tox/
+
+# ==========================================
+# Dependencias y Caché Frontend (Node/Vite)
+# ==========================================
+frontend/node_modules/
+node_modules/
+.vite/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# ==========================================
+# Artefactos de Compilación y Distribución
+# ==========================================
+frontend/dist/
+dist/
+build/
+*.egg-info/
+*.egg
+*.whl
+*.spec
+*.AppImage
+*.exe
+*.deb
+*.zip
+
+# ==========================================
+# Datos Locales de Ejecución y Logs
+# ==========================================
+backend/app/history.json
+history.json
+*.log
+
+# ==========================================
+# Variables de Entorno y Secretos
+# ==========================================
+.env
+.env.local
+.env.*.local
+
+# ==========================================
+# Archivos de Sistema Operativo y Editores
+# ==========================================
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+desktop.ini
+*.swp
+*.swo
+*~
+
+# IDEs
+.idea/
+.vscode/*
+!.vscode/settings.json
+!.vscode/extensions.json
