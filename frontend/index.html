@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Parf Gonodol</title>
+  <link rel="stylesheet" href="/src/styles/tokens.css">
+  <link rel="stylesheet" href="/src/styles/reset.css">
+  <link rel="stylesheet" href="/src/styles/calculator.css">
+  <link rel="stylesheet" href="/src/styles/buttons.css">
+  <link rel="stylesheet" href="/src/styles/drawer.css">
+</head>
+<body>
+  <!-- Overlay y Drawer del Menu Extensible -->
+  <div id="drawer-overlay" class="drawer-overlay"></div>
+  <aside id="drawer" class="drawer" aria-hidden="true">
+    <div class="drawer-header">
+      <span class="drawer-title">Parf Gonodol - Modulos</span>
+      <button id="btn-close-drawer" type="button" class="drawer-close" aria-label="Cerrar menu">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="18" y1="6" x2="6" y2="18"></line>
+          <line x1="6" y1="6" x2="18" y2="18"></line>
+        </svg>
+      </button>
+    </div>
+    <div id="drawer-body" class="drawer-body">
+      <!-- Inyectado dinamicamente desde MenuDrawer.js -->
+    </div>
+  </aside>
+
+  <!-- Chasis Principal de la Calculadora -->
+  <main class="calculator">
+    <header class="calculator-header">
+      <div class="header-left">
+        <button id="btn-menu" type="button" class="btn--menu" aria-label="Abrir menu de herramientas">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="3" y1="12" x2="21" y2="12"></line>
+            <line x1="3" y1="6" x2="21" y2="6"></line>
+            <line x1="3" y1="18" x2="21" y2="18"></line>
+          </svg>
+          <span>Menu</span>
+        </button>
+
+        <button id="btn-angle" type="button" class="btn--mode" aria-label="Conmutar modo angular">
+          <span id="badge-deg" class="badge is-active">DEG</span>
+          <span id="badge-rad" class="badge">RAD</span>
+        </button>
+      </div>
+
+      <div class="header-right">
+        <span id="badge-mem" class="badge" title="Memoria">M</span>
+        <span id="badge-2nd" class="badge" title="Segunda funcion">2nd</span>
+        <button id="btn-reset" type="button" class="btn--mode" title="Reiniciar calculadora">RESET</button>
+      </div>
+    </header>
+
+    <section class="display" aria-live="polite">
+      <div class="display-expression"></div>
+      <div class="display-result">0</div>
+    </section>
+
+    <section class="keypad" aria-label="Teclado numerico y cientifico">
+      <!-- Inyectado dinamicamente desde Keypad.js -->
+    </section>
+  </main>
+
+  <script type="module" src="/src/main.js"></script>
+</body>
+</html>
