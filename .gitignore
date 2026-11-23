@@ -31,6 +31,8 @@ npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 pnpm-debug.log*
+deno.lock
+frontend/deno.lock
 
 # ==========================================
 # Artefactos de Compilación y Distribución
