@@ -105,6 +105,45 @@ export function createCalculatorState() {
     notify();
   }
 
+  function memoryStore() {
+    const val = parseFloat(state.currentInput);
+    if (!isNaN(val)) {
+      state.memoryVal = val;
+      state.hasMemory = val !== 0;
+      notify();
+    }
+  }
+
+  function memoryRecall() {
+    if (state.hasMemory) {
+      append(String(state.memoryVal));
+    }
+  }
+
+  function memoryAdd() {
+    const val = parseFloat(state.currentInput);
+    if (!isNaN(val)) {
+      state.memoryVal += val;
+      state.hasMemory = state.memoryVal !== 0;
+      notify();
+    }
+  }
+
+  function memorySubtract() {
+    const val = parseFloat(state.currentInput);
+    if (!isNaN(val)) {
+      state.memoryVal -= val;
+      state.hasMemory = state.memoryVal !== 0;
+      notify();
+    }
+  }
+
+  function memoryClear() {
+    state.memoryVal = 0;
+    state.hasMemory = false;
+    notify();
+  }
+
   return {
     getState: () => ({ ...state }),
     subscribe,
@@ -117,6 +156,11 @@ export function createCalculatorState() {
     setPrecision,
     applyAns,
     setEvaluated,
-    setError
+    setError,
+    memoryStore,
+    memoryRecall,
+    memoryAdd,
+    memorySubtract,
+    memoryClear
   };
 }

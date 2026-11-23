@@ -47,10 +47,25 @@
         </button>
       </div>
 
-      <div class="header-right">
-        <span id="badge-mem" class="badge" title="Memoria">M</span>
-        <span id="badge-2nd" class="badge" title="Segunda funcion">2nd</span>
+      <div class="header-right" style="position: relative;">
+        <button id="btn-mem" type="button" class="btn--mode badge" title="Gestionar memoria">M</button>
+        <button id="btn-2nd" type="button" class="btn--mode badge" title="Alternar funciones secundarias">2nd</button>
         <button id="btn-reset" type="button" class="btn--mode" title="Reiniciar calculadora">RESET</button>
+
+        <!-- Popover flotante de Memoria -->
+        <div id="memory-popover" class="memory-popover" aria-hidden="true">
+          <div class="memory-popover-header">
+            <span>Memoria Interna</span>
+            <span id="memory-current-val" class="memory-val">0</span>
+          </div>
+          <div class="memory-actions">
+            <button id="btn-mc" type="button" class="mem-action-btn" title="Limpiar memoria">MC</button>
+            <button id="btn-mr" type="button" class="mem-action-btn" title="Recuperar memoria">MR</button>
+            <button id="btn-m-plus" type="button" class="mem-action-btn" title="Sumar a memoria">M+</button>
+            <button id="btn-m-minus" type="button" class="mem-action-btn" title="Restar de memoria">M−</button>
+            <button id="btn-ms" type="button" class="mem-action-btn" title="Guardar en memoria">MS</button>
+          </div>
+        </div>
       </div>
     </header>
 

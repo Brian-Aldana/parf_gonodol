@@ -15,10 +15,14 @@ const keypadContainer = document.querySelector(".keypad");
 
 const badgeDeg = document.getElementById("badge-deg");
 const badgeRad = document.getElementById("badge-rad");
-const badge2nd = document.getElementById("badge-2nd");
-const badgeMem = document.getElementById("badge-mem");
+const btnMem = document.getElementById("btn-mem");
+const btn2nd = document.getElementById("btn-2nd");
 const btnAngle = document.getElementById("btn-angle");
 const btnReset = document.getElementById("btn-reset");
+const memoryPopover = document.getElementById("memory-popover");
+const memoryCurrentVal = document.getElementById("memory-current-val");
+
+const keypad = Keypad(keypadContainer, handleKeyPress);
 
 state.subscribe((s) => {
   display.setExpression(s.expression);
@@ -27,12 +31,36 @@ state.subscribe((s) => {
   const isDeg = s.angleMode === "DEG";
   badgeDeg.classList.toggle("is-active", isDeg);
   badgeRad.classList.toggle("is-active", !isDeg);
-  badge2nd.classList.toggle("is-active", s.isSecond);
-  badgeMem.classList.toggle("is-active", s.hasMemory);
+  btn2nd.classList.toggle("is-active", s.isSecond);
+  btnMem.classList.toggle("is-active", s.hasMemory);
+
+  if (memoryCurrentVal) {
+    memoryCurrentVal.textContent = String(s.memoryVal);
+  }
+
+  keypad.setSecondMode(s.isSecond);
 });
 
+btnMem.addEventListener("click", (e) => {
+  e.stopPropagation();
+  memoryPopover.classList.toggle("is-open");
+});
+
+document.addEventListener("click", (e) => {
+  if (!memoryPopover.contains(e.target) && e.target !== btnMem) {
+    memoryPopover.classList.remove("is-open");
+  }
+});
+
+btn2nd.addEventListener("click", () => state.toggleSecond());
 btnAngle.addEventListener("click", () => state.toggleAngle());
 btnReset.addEventListener("click", () => state.clear());
+
+document.getElementById("btn-mc")?.addEventListener("click", () => state.memoryClear());
+document.getElementById("btn-mr")?.addEventListener("click", () => state.memoryRecall());
+document.getElementById("btn-m-plus")?.addEventListener("click", () => state.memoryAdd());
+document.getElementById("btn-m-minus")?.addEventListener("click", () => state.memorySubtract());
+document.getElementById("btn-ms")?.addEventListener("click", () => state.memoryStore());
 
 async function handleEvaluate() {
   const s = state.getState();

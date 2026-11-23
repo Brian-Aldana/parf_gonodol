@@ -1,15 +1,15 @@
 export const KEYPAD_KEYS = [
   { id: "2nd", label: "2nd", type: "sci", action: "toggle-2nd" },
   { id: "deg", label: "deg", type: "sci", action: "toggle-angle" },
-  { id: "sin", label: "sin", type: "sci", value: "sin(" },
-  { id: "cos", label: "cos", type: "sci", value: "cos(" },
-  { id: "tan", label: "tan", type: "sci", value: "tan(" },
+  { id: "sin", label: "sin", label2nd: "asin", type: "sci", value: "sin(", value2nd: "asin(" },
+  { id: "cos", label: "cos", label2nd: "acos", type: "sci", value: "cos(", value2nd: "acos(" },
+  { id: "tan", label: "tan", label2nd: "atan", type: "sci", value: "tan(", value2nd: "atan(" },
 
-  { id: "pow", label: "xʸ", type: "sci", value: "**" },
-  { id: "sqr", label: "x²", type: "sci", value: "**2" },
-  { id: "sqrt", label: "√", type: "sci", value: "sqrt(" },
-  { id: "ln", label: "ln", type: "sci", value: "log(" },
-  { id: "log", label: "log", type: "sci", value: "log10(" },
+  { id: "pow", label: "xʸ", label2nd: "ʸ√x", type: "sci", value: "**", value2nd: "**(1/" },
+  { id: "sqr", label: "x²", label2nd: "x³", type: "sci", value: "**2", value2nd: "**3" },
+  { id: "sqrt", label: "√", label2nd: "∛", type: "sci", value: "sqrt(", value2nd: "pow(" },
+  { id: "ln", label: "ln", label2nd: "eˣ", type: "sci", value: "log(", value2nd: "exp(" },
+  { id: "log", label: "log", label2nd: "10ˣ", type: "sci", value: "log10(", value2nd: "10**" },
 
   { id: "lpar", label: "(", type: "sci", value: "(" },
   { id: "rpar", label: ")", type: "sci", value: ")" },
@@ -43,26 +43,44 @@ export const KEYPAD_KEYS = [
 ];
 
 export function Keypad(container, onKeyPress) {
+  let isSecondMode = false;
+
   function render() {
     container.innerHTML = "";
     KEYPAD_KEYS.forEach((k) => {
       const btn = document.createElement("button");
       btn.type = "button";
       btn.className = `btn btn--${k.type}`;
-      btn.textContent = k.label;
+      btn.textContent = isSecondMode && k.label2nd ? k.label2nd : k.label;
       btn.dataset.id = k.id;
-      if (k.value) btn.dataset.value = k.value;
+      
+      const val = isSecondMode && k.value2nd ? k.value2nd : k.value;
+      if (val) btn.dataset.value = val;
       if (k.action) btn.dataset.action = k.action;
       container.appendChild(btn);
     });
+  }
+
+  function setSecondMode(active) {
+    if (isSecondMode !== active) {
+      isSecondMode = active;
+      render();
+    }
   }
 
   container.addEventListener("click", (e) => {
     const btn = e.target.closest("button");
     if (!btn) return;
     const keyData = KEYPAD_KEYS.find((k) => k.id === btn.dataset.id);
-    if (keyData && onKeyPress) onKeyPress(keyData);
+    if (!keyData) return;
+
+    const val = isSecondMode && keyData.value2nd ? keyData.value2nd : keyData.value;
+    if (onKeyPress) {
+      onKeyPress({ ...keyData, resolvedValue: val });
+    }
   });
 
   render();
+
+  return { setSecondMode };
 }
