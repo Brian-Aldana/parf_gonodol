@@ -39,6 +39,29 @@ def open_browser_app(url: str):
     webbrowser.open(url)
 
 
+def setup_window_icon():
+    icon_png = os.path.abspath(os.path.join(os.path.dirname(__file__), "icon.png"))
+    if not os.path.exists(icon_png):
+        return
+
+    try:
+        from PyQt6.QtWidgets import QApplication
+        from PyQt6.QtGui import QIcon
+        app = QApplication.instance()
+        if app:
+            app.setWindowIcon(QIcon(icon_png))
+    except Exception:
+        pass
+
+    try:
+        import gi
+        gi.require_version("Gtk", "3.0")
+        from gi.repository import Gtk
+        Gtk.Window.set_default_icon_from_file(icon_png)
+    except Exception:
+        pass
+
+
 def main():
     port = find_free_port()
     server_thread = threading.Thread(target=run_server, args=(port,), daemon=True)
@@ -47,17 +70,20 @@ def main():
     url = f"http://127.0.0.1:{port}"
     time.sleep(0.4)
 
+    setup_window_icon()
+
     try:
         import webview
         window = webview.create_window(
             title="Parf Gonodol",
             url=url,
-            width=380,
-            height=680,
-            min_size=(340, 580),
-            resizable=True
+            width=360,
+            height=580,
+            min_size=(300, 460),
+            resizable=True,
+            background_color="#161b24"
         )
-        webview.start()
+        webview.start(func=setup_window_icon)
     except Exception:
         open_browser_app(url)
         try:

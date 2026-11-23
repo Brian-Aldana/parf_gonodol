@@ -1,0 +1,39 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <defs>
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#1c2333"/>
+      <stop offset="100%" stop-color="#0f1217"/>
+    </linearGradient>
+    <linearGradient id="accentGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#6ba3ff"/>
+      <stop offset="100%" stop-color="#4f8ef7"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Chasis -->
+  <rect x="32" y="32" width="448" height="448" rx="96" fill="url(#bgGrad)" stroke="#252d3d" stroke-width="12"/>
+
+  <!-- Pantalla / Display -->
+  <rect x="80" y="80" width="352" height="110" rx="24" fill="#090c10" stroke="#252d3d" stroke-width="6"/>
+  <rect x="320" y="145" width="85" height="18" rx="4" fill="url(#accentGrad)" opacity="0.9"/>
+  <rect x="230" y="145" width="75" height="18" rx="4" fill="#6b7a99" opacity="0.6"/>
+
+  <!-- Matriz de Teclas -->
+  <!-- Fila 1 -->
+  <rect x="80" y="225" width="68" height="60" rx="16" fill="#161b24" stroke="#252d3d" stroke-width="4"/>
+  <rect x="174" y="225" width="68" height="60" rx="16" fill="#161b24" stroke="#252d3d" stroke-width="4"/>
+  <rect x="268" y="225" width="68" height="60" rx="16" fill="#161b24" stroke="#252d3d" stroke-width="4"/>
+  <rect x="364" y="225" width="68" height="60" rx="16" fill="#e8a44a" opacity="0.9"/>
+
+  <!-- Fila 2 -->
+  <rect x="80" y="305" width="68" height="60" rx="16" fill="#1f283d" stroke="#252d3d" stroke-width="4"/>
+  <rect x="174" y="305" width="68" height="60" rx="16" fill="#1f283d" stroke="#252d3d" stroke-width="4"/>
+  <rect x="268" y="305" width="68" height="60" rx="16" fill="#1f283d" stroke="#252d3d" stroke-width="4"/>
+  <rect x="364" y="305" width="68" height="60" rx="16" fill="#252d3d" stroke="#4f8ef7" stroke-width="4"/>
+
+  <!-- Fila 3 -->
+  <rect x="80" y="385" width="68" height="60" rx="16" fill="#1f283d" stroke="#252d3d" stroke-width="4"/>
+  <rect x="174" y="385" width="68" height="60" rx="16" fill="#1f283d" stroke="#252d3d" stroke-width="4"/>
+  <rect x="268" y="385" width="68" height="60" rx="16" fill="#1f283d" stroke="#252d3d" stroke-width="4"/>
+  <rect x="364" y="385" width="68" height="60" rx="16" fill="url(#accentGrad)"/>
+</svg>
