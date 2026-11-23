@@ -62,21 +62,36 @@ def setup_window_icon():
             app_instance.setWindowIcon(icon)
             for widget in app_instance.topLevelWidgets():
                 widget.setWindowIcon(icon)
+            return
     except Exception:
         pass
 
     try:
-        import gi
-        gi.require_version("Gtk", "3.0")
-        from gi.repository import Gtk
-        Gtk.Window.set_default_icon_from_file(icon_png)
-        for win in Gtk.Window.list_toplevels():
-            win.set_icon_from_file(icon_png)
+        import sys
+        if "gi.repository.Gtk" in sys.modules:
+            from gi.repository import Gtk
+            Gtk.Window.set_default_icon_from_file(icon_png)
+            for win in Gtk.Window.list_toplevels():
+                win.set_icon_from_file(icon_png)
+    except Exception:
+        pass
+
+
+def install_message_filters():
+    try:
+        from PyQt6.QtCore import qInstallMessageHandler
+
+        def qt_message_handler(mode, context, message):
+            if "WebEnginePage" in message or "appmenu" in message:
+                return
+
+        qInstallMessageHandler(qt_message_handler)
     except Exception:
         pass
 
 
 def main():
+    install_message_filters()
     port = find_free_port()
     server_thread = threading.Thread(target=run_server, args=(port,), daemon=True)
     server_thread.start()
