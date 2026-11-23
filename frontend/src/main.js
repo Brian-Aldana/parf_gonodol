@@ -10,9 +10,7 @@ INITIAL_MODULES.forEach((mod) => registerModule(mod));
 
 const state = createCalculatorState();
 
-const display = Display(document.querySelector(".display"));
 const keypadContainer = document.querySelector(".keypad");
-
 const badgeDeg = document.getElementById("badge-deg");
 const badgeRad = document.getElementById("badge-rad");
 const btnMem = document.getElementById("btn-mem");
@@ -22,11 +20,28 @@ const btnReset = document.getElementById("btn-reset");
 const memoryPopover = document.getElementById("memory-popover");
 const memoryCurrentVal = document.getElementById("memory-current-val");
 
+const display = Display(document.querySelector(".display"), {
+  onInput: (val, pos) => state.setFromInput(val, pos),
+  onEnter: () => handleEvaluate(),
+  onEscape: () => state.clear()
+});
+
 const keypad = Keypad(keypadContainer, handleKeyPress);
+
+// Evita que el campo de texto pierda foco al hacer clic en los botones
+keypadContainer.addEventListener("mousedown", (e) => {
+  if (e.target.closest("button")) {
+    e.preventDefault();
+  }
+});
 
 state.subscribe((s) => {
   display.setExpression(s.expression);
-  display.setResult(s.currentInput, s.currentInput === "Error" || s.currentInput.startsWith("Error"));
+  display.setValue(
+    s.currentInput,
+    s.currentInput === "Error" || s.currentInput.startsWith("Error"),
+    s.cursorPos
+  );
 
   const isDeg = s.angleMode === "DEG";
   badgeDeg.classList.toggle("is-active", isDeg);
@@ -54,10 +69,17 @@ document.addEventListener("click", (e) => {
 
 btn2nd.addEventListener("click", () => state.toggleSecond());
 btnAngle.addEventListener("click", () => state.toggleAngle());
-btnReset.addEventListener("click", () => state.clear());
+btnReset.addEventListener("click", () => {
+  state.clear();
+  display.focus();
+});
 
 document.getElementById("btn-mc")?.addEventListener("click", () => state.memoryClear());
-document.getElementById("btn-mr")?.addEventListener("click", () => state.memoryRecall());
+document.getElementById("btn-mr")?.addEventListener("click", () => {
+  const sel = display.getSelection();
+  state.memoryRecall(sel.start, sel.end);
+  display.focus();
+});
 document.getElementById("btn-m-plus")?.addEventListener("click", () => state.memoryAdd());
 document.getElementById("btn-m-minus")?.addEventListener("click", () => state.memorySubtract());
 document.getElementById("btn-ms")?.addEventListener("click", () => state.memoryStore());
@@ -74,13 +96,16 @@ async function handleEvaluate() {
   } catch (err) {
     state.setError(err.message || "Error");
   }
+  display.focus();
 }
 
 function handleKeyPress(key) {
+  const sel = display.getSelection();
+
   if (key.action === "evaluate") {
     handleEvaluate();
   } else if (key.action === "del") {
-    state.backspace();
+    state.deleteAtCursor(sel.start, sel.end);
   } else if (key.action === "ac") {
     state.clear();
   } else if (key.action === "toggle-angle") {
@@ -90,13 +115,13 @@ function handleKeyPress(key) {
   } else if (key.action === "negate") {
     state.negate();
   } else if (key.action === "ans") {
-    state.applyAns();
-  } else if (key.value) {
-    state.append(key.value);
+    state.applyAns(sel.start, sel.end);
+  } else if (key.resolvedValue) {
+    state.insertAtCursor(key.resolvedValue, sel.start, sel.end);
   }
-}
 
-Keypad(keypadContainer, handleKeyPress);
+  display.focus();
+}
 
 const drawer = MenuDrawer({
   drawerEl: document.getElementById("drawer"),
@@ -111,25 +136,11 @@ const drawer = MenuDrawer({
   }
 });
 
+// Atajo global para abrir menu con 'm' si no se esta editando texto
 window.addEventListener("keydown", (e) => {
-  if (e.target.tagName === "INPUT" || e.target.tagName === "SELECT") return;
-
-  if (e.key >= "0" && e.key <= "9") {
-    state.append(e.key);
-  } else if (e.key === ".") {
-    state.append(".");
-  } else if (e.key === "+" || e.key === "-" || e.key === "*" || e.key === "/" || e.key === "%") {
-    state.append(e.key);
-  } else if (e.key === "(" || e.key === ")") {
-    state.append(e.key);
-  } else if (e.key === "Enter" || e.key === "=") {
-    e.preventDefault();
-    handleEvaluate();
-  } else if (e.key === "Backspace") {
-    state.backspace();
-  } else if (e.key === "Escape") {
-    state.clear();
-  } else if (e.key.toLowerCase() === "m") {
+  if (e.target.tagName !== "INPUT" && e.key.toLowerCase() === "m") {
     drawer.open();
   }
 });
+
+display.focus();

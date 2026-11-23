@@ -2,6 +2,7 @@ export function createCalculatorState() {
   const state = {
     currentInput: "0",
     expression: "",
+    cursorPos: 1,
     angleMode: "DEG",
     isSecond: false,
     lastAns: "0",
@@ -23,41 +24,73 @@ export function createCalculatorState() {
     return () => listeners.delete(fn);
   }
 
-  function append(str) {
+  function insertAtCursor(str, start = state.cursorPos, end = state.cursorPos) {
+    const s = Math.min(start, end);
+    const e = Math.max(start, end);
+
     if (state.isEvaluated) {
       if (!isNaN(str) || str === ".") {
         state.currentInput = str;
         state.expression = "";
+        state.cursorPos = str.length;
       } else {
         state.currentInput += str;
+        state.cursorPos = state.currentInput.length;
       }
       state.isEvaluated = false;
-    } else {
-      if (state.currentInput === "0" && !isNaN(str)) {
-        state.currentInput = str;
-      } else {
-        state.currentInput += str;
-      }
+      notify();
+      return;
     }
+
+    if (state.currentInput === "0" && s === 0 && e <= 1 && !isNaN(str)) {
+      state.currentInput = str;
+      state.cursorPos = str.length;
+    } else {
+      const before = state.currentInput.slice(0, s);
+      const after = state.currentInput.slice(e);
+      state.currentInput = before + str + after;
+      state.cursorPos = s + str.length;
+    }
+
     notify();
   }
 
-  function backspace() {
+  function deleteAtCursor(start = state.cursorPos, end = state.cursorPos) {
     if (state.isEvaluated) {
       clear();
       return;
     }
-    if (state.currentInput.length > 1) {
-      state.currentInput = state.currentInput.slice(0, -1);
-    } else {
-      state.currentInput = "0";
+
+    const s = Math.min(start, end);
+    const e = Math.max(start, end);
+
+    if (s !== e) {
+      state.currentInput = state.currentInput.slice(0, s) + state.currentInput.slice(e);
+      state.cursorPos = s;
+    } else if (s > 0) {
+      state.currentInput = state.currentInput.slice(0, s - 1) + state.currentInput.slice(s);
+      state.cursorPos = s - 1;
     }
+
+    if (state.currentInput === "") {
+      state.currentInput = "0";
+      state.cursorPos = 1;
+    }
+
+    notify();
+  }
+
+  function setFromInput(val, pos) {
+    state.currentInput = val || "0";
+    state.cursorPos = pos ?? state.currentInput.length;
+    state.isEvaluated = false;
     notify();
   }
 
   function clear() {
     state.currentInput = "0";
     state.expression = "";
+    state.cursorPos = 1;
     state.isEvaluated = false;
     notify();
   }
@@ -75,8 +108,10 @@ export function createCalculatorState() {
   function negate() {
     if (state.currentInput.startsWith("-")) {
       state.currentInput = state.currentInput.slice(1);
+      state.cursorPos = Math.max(0, state.cursorPos - 1);
     } else if (state.currentInput !== "0") {
       state.currentInput = "-" + state.currentInput;
+      state.cursorPos += 1;
     }
     notify();
   }
@@ -86,14 +121,15 @@ export function createCalculatorState() {
     notify();
   }
 
-  function applyAns() {
-    append(state.lastAns);
+  function applyAns(start = state.cursorPos, end = state.cursorPos) {
+    insertAtCursor(state.lastAns, start, end);
   }
 
   function setEvaluated(result) {
     state.expression = state.currentInput;
     state.currentInput = result;
     state.lastAns = result;
+    state.cursorPos = result.length;
     state.isEvaluated = true;
     notify();
   }
@@ -101,6 +137,7 @@ export function createCalculatorState() {
   function setError(message) {
     state.expression = state.currentInput;
     state.currentInput = message;
+    state.cursorPos = message.length;
     state.isEvaluated = true;
     notify();
   }
@@ -116,7 +153,7 @@ export function createCalculatorState() {
 
   function memoryRecall() {
     if (state.hasMemory) {
-      append(String(state.memoryVal));
+      insertAtCursor(String(state.memoryVal));
     }
   }
 
@@ -147,8 +184,9 @@ export function createCalculatorState() {
   return {
     getState: () => ({ ...state }),
     subscribe,
-    append,
-    backspace,
+    insertAtCursor,
+    deleteAtCursor,
+    setFromInput,
     clear,
     toggleAngle,
     toggleSecond,
