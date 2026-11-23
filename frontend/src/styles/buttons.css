@@ -8,7 +8,7 @@
   border-radius: var(--radius-sm);
   border: 1px solid var(--color-border);
   font-family: var(--font-mono);
-  font-size: clamp(12px, 2.3vh, 16px);
+  font-size: clamp(12px, 2.5vh, 22px);
   font-weight: 500;
   transition: background-color 90ms ease, border-color 90ms ease, transform 80ms ease;
   cursor: pointer;
@@ -38,7 +38,7 @@
 .btn--sci {
   background-color: var(--color-surface);
   color: var(--color-text-secondary);
-  font-size: 12px;
+  font-size: clamp(11px, 2.1vh, 18px);
 }
 
 .btn--sci:hover {
@@ -50,7 +50,7 @@
 .btn--op {
   background-color: var(--color-surface);
   color: var(--color-operator);
-  font-size: 15px;
+  font-size: clamp(14px, 2.8vh, 26px);
   font-weight: 600;
 }
 
@@ -62,7 +62,7 @@
 .btn--del {
   background-color: var(--color-surface);
   color: var(--color-warn);
-  font-size: 11px;
+  font-size: clamp(11px, 2vh, 17px);
   font-weight: 600;
 }
 
@@ -74,7 +74,7 @@
 .btn--ac {
   background-color: var(--color-surface);
   color: var(--color-danger);
-  font-size: 11px;
+  font-size: clamp(11px, 2vh, 17px);
   font-weight: 700;
 }
 
@@ -87,7 +87,7 @@
   background-color: var(--color-accent);
   border-color: var(--color-accent);
   color: var(--color-accent-fg);
-  font-size: 18px;
+  font-size: clamp(16px, 3.2vh, 30px);
   font-weight: 700;
 }
 
@@ -99,12 +99,12 @@
 .btn--mode {
   background-color: var(--color-surface);
   color: var(--color-text-muted);
-  font-size: 10px;
+  font-size: clamp(10px, 1.8vh, 13px);
   font-weight: 600;
   letter-spacing: 0.04em;
   border: 1px solid var(--color-border);
-  padding: 0 8px;
-  height: 26px;
+  padding: 0 clamp(6px, 1.5vw, 12px);
+  height: clamp(26px, 4vh, 34px);
   border-radius: var(--radius-sm);
   cursor: pointer;
   transition: color 90ms ease, border-color 90ms ease;
@@ -118,13 +118,13 @@
   display: flex;
   align-items: center;
   gap: 5px;
-  padding: 0 8px;
-  height: 26px;
+  padding: 0 clamp(6px, 1.5vw, 12px);
+  height: clamp(26px, 4vh, 34px);
   border-radius: var(--radius-sm);
   border: 1px solid var(--color-border);
   background-color: var(--color-surface);
   color: var(--color-text-secondary);
-  font-size: 11px;
+  font-size: clamp(11px, 1.8vh, 14px);
   font-weight: 500;
   font-family: var(--font-mono);
   cursor: pointer;

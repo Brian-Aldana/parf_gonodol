@@ -22,7 +22,7 @@
   justify-content: space-between;
   gap: 8px;
   flex-shrink: 0;
-  height: 30px;
+  height: clamp(30px, 4.5vh, 40px);
 }
 
 .header-left {
@@ -41,22 +41,22 @@
   background-color: var(--color-bg);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-md);
-  padding: 8px 12px;
+  padding: clamp(8px, 1.8vh, 18px) clamp(10px, 2.5vw, 20px);
   display: flex;
   flex-direction: column;
-  justify-content: space-between;
-  min-height: 64px;
-  max-height: 85px;
+  justify-content: space-around;
+  min-height: 72px;
+  height: clamp(76px, 18vh, 180px);
   flex-shrink: 0;
 }
 
 .display-expression {
-  font-size: 11px;
+  font-size: clamp(11px, 2vh, 18px);
   color: var(--color-text-secondary);
   text-align: right;
   overflow-x: auto;
   white-space: nowrap;
-  min-height: 15px;
+  min-height: 1.2em;
   letter-spacing: 0.01em;
 }
 
@@ -67,7 +67,7 @@
   outline: none;
   color: var(--color-text-primary);
   font-family: var(--font-mono);
-  font-size: clamp(20px, 4.5vh, 28px);
+  font-size: clamp(24px, 5.5vh, 52px);
   font-weight: 600;
   text-align: right;
   font-variant-numeric: tabular-nums;
@@ -75,7 +75,7 @@
   padding: 0;
   margin: 0;
   letter-spacing: -0.02em;
-  line-height: 1.1;
+  line-height: 1.15;
 }
 
 .display-input::selection {
@@ -84,7 +84,7 @@
 
 .display-input.is-error {
   color: var(--color-danger);
-  font-size: 15px;
+  font-size: clamp(16px, 3vh, 28px);
   font-weight: 500;
 }
 
