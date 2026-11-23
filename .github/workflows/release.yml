@@ -4,6 +4,7 @@ on:
   push:
     tags:
       - "v*"
+  workflow_dispatch:
 
 permissions:
   contents: write
@@ -25,28 +26,27 @@ jobs:
         with:
           node-version: "20"
 
-      - name: Install uv
-        run: curl -LsSf https://astral.sh/uv/install.ps1 | iex
-        shell: powershell
+      - name: Set up uv
+        uses: astral-sh/setup-uv@v5
 
       - name: Build Frontend
+        shell: bash
         run: |
           cd frontend
           npm install
           npm run build
 
       - name: Install Python Dependencies and PyInstaller
+        shell: bash
         run: |
-          uv venv
-          .venv\Scripts\activate
-          uv pip install -r backend/requirements.txt
-          uv pip install pyinstaller
+          uv venv .venv
+          uv pip install --python .venv -r backend/requirements.txt
+          uv pip install --python .venv pyinstaller
 
       - name: Compile Executable with PyInstaller
         shell: bash
         run: |
-          source .venv/Scripts/activate
-          pyinstaller --noconfirm --onedir --windowed \
+          .venv/Scripts/pyinstaller --noconfirm --onedir --windowed \
             --name "Parf-Gonodol" \
             --add-data "frontend/dist;frontend/dist" \
             --add-data "desktop/icon.png;desktop" \
@@ -81,8 +81,8 @@ jobs:
         with:
           node-version: "20"
 
-      - name: Install uv
-        run: curl -LsSf https://astral.sh/uv/install.sh | sh
+      - name: Set up uv
+        uses: astral-sh/setup-uv@v5
 
       - name: Build Frontend
         run: |
@@ -92,15 +92,13 @@ jobs:
 
       - name: Install Dependencies and PyInstaller
         run: |
-          $HOME/.local/bin/uv venv
-          source .venv/bin/activate
-          $HOME/.local/bin/uv pip install -r backend/requirements.txt
-          $HOME/.local/bin/uv pip install pyinstaller pyqt6 pyqt6-webengine
+          uv venv .venv
+          uv pip install --python .venv -r backend/requirements.txt
+          uv pip install --python .venv pyinstaller pyqt6 pyqt6-webengine
 
       - name: Compile Linux Binary
         run: |
-          source .venv/bin/activate
-          pyinstaller --noconfirm --onedir --windowed \
+          .venv/bin/pyinstaller --noconfirm --onedir --windowed \
             --name "Parf-Gonodol" \
             --add-data "frontend/dist:frontend/dist" \
             --add-data "desktop/icon.png:desktop" \
