@@ -41,22 +41,23 @@
   background-color: var(--color-bg);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-md);
-  padding: clamp(8px, 1.8vh, 18px) clamp(10px, 2.5vw, 20px);
+  padding: clamp(10px, 2.2vh, 24px) clamp(12px, 2.5vw, 24px);
   display: flex;
   flex-direction: column;
-  justify-content: space-around;
-  min-height: 72px;
-  height: clamp(76px, 18vh, 180px);
+  justify-content: space-between;
+  min-height: 80px;
+  height: clamp(84px, 25vh, 320px);
   flex-shrink: 0;
+  box-sizing: border-box;
 }
 
 .display-expression {
-  font-size: clamp(11px, 2vh, 18px);
+  font-size: clamp(12px, 2.6vh, 26px);
   color: var(--color-text-secondary);
   text-align: right;
   overflow-x: auto;
   white-space: nowrap;
-  min-height: 1.2em;
+  min-height: 1.3em;
   letter-spacing: 0.01em;
 }
 
@@ -67,7 +68,7 @@
   outline: none;
   color: var(--color-text-primary);
   font-family: var(--font-mono);
-  font-size: clamp(24px, 5.5vh, 52px);
+  font-size: clamp(26px, 7.5vh, 76px);
   font-weight: 600;
   text-align: right;
   font-variant-numeric: tabular-nums;
@@ -75,7 +76,7 @@
   padding: 0;
   margin: 0;
   letter-spacing: -0.02em;
-  line-height: 1.15;
+  line-height: 1.18;
 }
 
 .display-input::selection {
@@ -84,7 +85,7 @@
 
 .display-input.is-error {
   color: var(--color-danger);
-  font-size: clamp(16px, 3vh, 28px);
+  font-size: clamp(16px, 3.5vh, 32px);
   font-weight: 500;
 }
 
@@ -100,12 +101,7 @@
 
 @media (max-width: 360px) {
   .calculator {
-    width: 100vw;
-    border-radius: 0;
-    padding: 10px;
-  }
-
-  .display-result {
-    font-size: 22px;
+    padding: 8px;
+    gap: 6px;
   }
 }

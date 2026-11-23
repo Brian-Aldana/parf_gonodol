@@ -1,5 +1,14 @@
 import os
 import sys
+
+# Silenciar advertencias de modulos opcionales del sistema de escritorio GTK
+if "GTK_MODULES" in os.environ:
+    modules = [m for m in os.environ["GTK_MODULES"].split(":") if "appmenu" not in m]
+    if modules:
+        os.environ["GTK_MODULES"] = ":".join(modules)
+    else:
+        os.environ.pop("GTK_MODULES", None)
+
 import time
 import socket
 import threading
@@ -47,9 +56,12 @@ def setup_window_icon():
     try:
         from PyQt6.QtWidgets import QApplication
         from PyQt6.QtGui import QIcon
-        app = QApplication.instance()
-        if app:
-            app.setWindowIcon(QIcon(icon_png))
+        app_instance = QApplication.instance()
+        if app_instance:
+            icon = QIcon(icon_png)
+            app_instance.setWindowIcon(icon)
+            for widget in app_instance.topLevelWidgets():
+                widget.setWindowIcon(icon)
     except Exception:
         pass
 
@@ -58,6 +70,8 @@ def setup_window_icon():
         gi.require_version("Gtk", "3.0")
         from gi.repository import Gtk
         Gtk.Window.set_default_icon_from_file(icon_png)
+        for win in Gtk.Window.list_toplevels():
+            win.set_icon_from_file(icon_png)
     except Exception:
         pass
 
@@ -70,7 +84,7 @@ def main():
     url = f"http://127.0.0.1:{port}"
     time.sleep(0.4)
 
-    setup_window_icon()
+    icon_png = os.path.abspath(os.path.join(os.path.dirname(__file__), "icon.png"))
 
     try:
         import webview
@@ -83,7 +97,10 @@ def main():
             resizable=True,
             background_color="#161b24"
         )
-        webview.start(func=setup_window_icon)
+        webview.start(
+            func=setup_window_icon,
+            icon=icon_png if os.path.exists(icon_png) else None
+        )
     except Exception:
         open_browser_app(url)
         try:
