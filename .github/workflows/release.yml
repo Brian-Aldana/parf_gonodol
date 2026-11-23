@@ -49,6 +49,7 @@ jobs:
           pyinstaller --noconfirm --onedir --windowed \
             --name "Parf-Gonodol" \
             --add-data "frontend/dist;frontend/dist" \
+            --add-data "desktop/icon.png;desktop" \
             --add-data "desktop/icon.svg;desktop" \
             desktop/entrypoint.py
 
@@ -94,7 +95,7 @@ jobs:
           $HOME/.local/bin/uv venv
           source .venv/bin/activate
           $HOME/.local/bin/uv pip install -r backend/requirements.txt
-          $HOME/.local/bin/uv pip install pyinstaller
+          $HOME/.local/bin/uv pip install pyinstaller pyqt6 pyqt6-webengine
 
       - name: Compile Linux Binary
         run: |
@@ -102,6 +103,7 @@ jobs:
           pyinstaller --noconfirm --onedir --windowed \
             --name "Parf-Gonodol" \
             --add-data "frontend/dist:frontend/dist" \
+            --add-data "desktop/icon.png:desktop" \
             --add-data "desktop/icon.svg:desktop" \
             desktop/entrypoint.py
           cd dist

@@ -18,7 +18,13 @@ app.include_router(calculator.router)
 app.include_router(history.router)
 app.include_router(modules.router)
 
-frontend_dist = os.path.join(os.path.dirname(__file__), "..", settings.frontend_dist)
+if getattr(sys, "frozen", False):
+    base_dir = getattr(sys, "_MEIPASS", os.path.dirname(sys.executable))
+    frontend_dist = os.path.join(base_dir, "frontend", "dist")
+    if not os.path.isdir(frontend_dist):
+        frontend_dist = os.path.join(os.path.dirname(sys.executable), "frontend", "dist")
+else:
+    frontend_dist = os.path.join(os.path.dirname(__file__), "..", settings.frontend_dist)
 
 if os.path.isdir(frontend_dist):
     app.mount("/", StaticFiles(directory=frontend_dist, html=True), name="frontend")

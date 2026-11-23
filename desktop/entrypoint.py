@@ -48,8 +48,18 @@ def open_browser_app(url: str):
     webbrowser.open(url)
 
 
+def get_icon_path() -> str:
+    if getattr(sys, "frozen", False):
+        base_dir = getattr(sys, "_MEIPASS", os.path.dirname(sys.executable))
+        icon_path = os.path.join(base_dir, "desktop", "icon.png")
+        if os.path.exists(icon_path):
+            return icon_path
+        return os.path.join(os.path.dirname(sys.executable), "desktop", "icon.png")
+    return os.path.abspath(os.path.join(os.path.dirname(__file__), "icon.png"))
+
+
 def setup_window_icon():
-    icon_png = os.path.abspath(os.path.join(os.path.dirname(__file__), "icon.png"))
+    icon_png = get_icon_path()
     if not os.path.exists(icon_png):
         return
 
@@ -99,7 +109,7 @@ def main():
     url = f"http://127.0.0.1:{port}"
     time.sleep(0.4)
 
-    icon_png = os.path.abspath(os.path.join(os.path.dirname(__file__), "icon.png"))
+    icon_png = get_icon_path()
 
     try:
         import webview
