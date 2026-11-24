@@ -26,13 +26,13 @@ async def test_solve_roots_bisection_endpoint():
                 "method": "bisection",
                 "xl": 2.0,
                 "xu": 3.0,
-                "tolerance": 0.01,
+                "tolerance": 0.001,
             },
         )
         assert res.status_code == 200
         data = res.json()
         assert data["converged"] is True
-        assert abs(data["root"] - 2.0945) < 0.005
+        assert abs(data["root"] - 2.0945) < 0.002
         assert len(data["table"]) > 0
 
 
@@ -42,16 +42,42 @@ async def test_solve_roots_newton_raphson_endpoint():
         res = await client.post(
             "/api/plot/solve-roots",
             json={
-                "expression": "x**3 - 2*x - 5",
+                "expression": "x**4 - 2",
                 "method": "newton_raphson",
-                "x0": 2.0,
-                "tolerance": 0.01,
+                "x0": 1.5,
+                "tolerance": 0.001,
+                "error_type": "absolute",
             },
         )
         assert res.status_code == 200
         data = res.json()
         assert data["converged"] is True
-        assert abs(data["root"] - 2.0945) < 0.001
+        assert data["iterations"] == 4
+        assert abs(data["root"] - 1.189207) < 1e-5
+        assert data["final_ea"] < 0.001
+        assert "k" in data["table"][0]
+        assert "ea" in data["table"][0]
+        assert "er" in data["table"][0]
+
+
+@pytest.mark.asyncio
+async def test_solve_roots_fixed_point_endpoint():
+    async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
+        res = await client.post(
+            "/api/plot/solve-roots",
+            json={
+                "expression": "2*sin(sqrt(x))",
+                "method": "fixed_point",
+                "x0": 1.5,
+                "tolerance": 0.001,
+                "error_type": "absolute",
+            },
+        )
+        assert res.status_code == 200
+        data = res.json()
+        assert data["converged"] is True
+        assert data["iterations"] == 5
+        assert abs(data["root"] - 1.972361) < 1e-4
 
 
 @pytest.mark.asyncio

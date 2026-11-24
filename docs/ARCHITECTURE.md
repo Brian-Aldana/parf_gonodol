@@ -67,9 +67,12 @@ Para garantizar precision matematica absoluta sin vulnerabilidades de inyeccion 
 3. **Normalizacion de Notacion Trigonometrica**: Mapeo transparente para expresiones en espanol y notacion de potencias inversas (`sen` -> `sin`, `arcsen` -> `asin`, `sen⁻¹` -> `asin`, `cos⁻¹` -> `acos`, `tan⁻¹` -> `atan`).
 4. **Precision Arbitraria**: Conmutacion transparente entre evaluacion simbolica exacta con SymPy y precision decimal arbitraria con la biblioteca estandar `decimal`.
 
-### 3.2 Modulo de Metodos Numericos (`root_finding.py`)
+### 3.2 Modulo de Metodos Numericos y Metricas de Error (`root_finding.py`, `error_metrics.py`)
 Implementa algoritmos desacoplados con contratos de entrada y salida consistentes:
-- Retorna un diccionario estructurado que incluye la raiz aproximada, el error relativo final $|\epsilon_a|$, el numero de iteraciones ejecutadas, el estado de convergencia y la tabla completa de iteraciones.
+- Calculo desacoplado de metricas de error en `error_metrics.py`: evalua Error Absoluto ($E_a$), Error Relativo ($E_r$) y Error Porcentual ($E_p\%$).
+- Permite seleccionar el criterio de parada estricto (`absolute`, `relative`, `percentage`) sin conversiones forzadas que distorsionen el numero real de iteraciones.
+- Soporte para metodos cerrados (Biseccion, Regla Falsa) y abiertos (Newton-Raphson, Punto Fijo con $x = g(x)$, Secante).
+- Retorna un resultado estructurado con la raiz aproximada, el error final, el tipo de criterio empleado, el numero exacto de iteraciones ejecutadas y la tabla completa de iteraciones indexada en $k$.
 - Los metodos cerrados verifican formalmente el teorema del valor intermedio ($f(x_l) \cdot f(x_u) \le 0$) antes de iniciar las iteraciones.
 
 ---

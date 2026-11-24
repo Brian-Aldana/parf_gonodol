@@ -41,9 +41,9 @@ Parf Gonodol combina la inmediatez y ergonomia de una calculadora cientifica de 
 - **Diseno Responsivo con Autolayout**: Adaptacion automatica de la interfaz segun el espacio disponible (disposicion lado a lado en pantallas amplias y apilamiento vertical fluido en ventanas compactas $\le 820\text{px}$), con scrollbars oscuros estilizados.
 - **Metodos de Resolucion de Raices**:
   - **Metodos Cerrados**: Biseccion y Regla Falsa (Regula Falsi) con verificacion automatica de cambio de signo en $[x_l, x_u]$.
-  - **Metodos Abiertos**: Newton-Raphson (con derivada automatica simbolica por SymPy o derivada manual opcional) y Metodo de la Secante.
-  - Criterio de convergencia por error relativo porcentual ($|\epsilon_a| \le tol\%$).
-  - Tabla de iteraciones paso a paso con opcion de copiado instantaneo a formato CSV.
+  - **Metodos Abiertos**: Newton-Raphson (con derivada automatica simbolica por SymPy o derivada manual opcional), Metodo del Punto Fijo ($x_{k+1} = g(x_k)$) y Metodo de la Secante.
+  - **Criterios de Parada Configurables**: Eleccion entre Error Absoluto ($E_a = |x_{k+1} - x_k|$), Error Relativo ($E_r$) y Error Porcentual ($E_p\%$).
+  - **Tabla de Iteraciones Paso a Paso**: Indice $k$ estandar, reporte simultaneo de $E_a$ y $E_r$, valores de funcion/derivada y copiado instantaneo a CSV.
 - **Analisis de Calculo Formateado**: Evaluacion de primera y segunda derivada analitica con formato matematico estilizado ($3x^2 - 2$), integral definida $\int_a^b f(x)\,dx$ y localizacion de maximos y minimos relativos con insignias visuales.
 - **Tabulacion de Valores**: Generacion de tablas $(x, f(x))$ con rango y paso $\Delta x$ personalizables y exportacion a CSV.
 

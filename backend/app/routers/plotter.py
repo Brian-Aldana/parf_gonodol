@@ -35,13 +35,23 @@ async def solve_roots(payload: SolveRootsRequest) -> SolveRootsResponse:
             if payload.xl is None or payload.xu is None:
                 raise HTTPException(status_code=400, detail="Biseccion requiere xl y xu")
             res = root_finding.solve_bisection(
-                payload.expression, payload.xl, payload.xu, payload.tolerance, payload.max_iter
+                payload.expression,
+                payload.xl,
+                payload.xu,
+                payload.tolerance,
+                payload.max_iter,
+                payload.error_type,
             )
         elif payload.method == "false_position":
             if payload.xl is None or payload.xu is None:
                 raise HTTPException(status_code=400, detail="Regla Falsa requiere xl y xu")
             res = root_finding.solve_false_position(
-                payload.expression, payload.xl, payload.xu, payload.tolerance, payload.max_iter
+                payload.expression,
+                payload.xl,
+                payload.xu,
+                payload.tolerance,
+                payload.max_iter,
+                payload.error_type,
             )
         elif payload.method == "newton_raphson":
             if payload.x0 is None:
@@ -52,12 +62,29 @@ async def solve_roots(payload: SolveRootsRequest) -> SolveRootsResponse:
                 payload.manual_df,
                 payload.tolerance,
                 payload.max_iter,
+                payload.error_type,
             )
         elif payload.method == "secant":
             if payload.x0 is None or payload.x1 is None:
                 raise HTTPException(status_code=400, detail="Secante requiere x0 y x1")
             res = root_finding.solve_secant(
-                payload.expression, payload.x0, payload.x1, payload.tolerance, payload.max_iter
+                payload.expression,
+                payload.x0,
+                payload.x1,
+                payload.tolerance,
+                payload.max_iter,
+                payload.error_type,
+            )
+        elif payload.method == "fixed_point":
+            if payload.x0 is None:
+                raise HTTPException(status_code=400, detail="Punto Fijo requiere x0")
+            gx_expr = payload.gx if (payload.gx and payload.gx.strip()) else payload.expression
+            res = root_finding.solve_fixed_point(
+                gx_expr,
+                payload.x0,
+                payload.tolerance,
+                payload.max_iter,
+                payload.error_type,
             )
         else:
             raise HTTPException(status_code=400, detail=f"Metodo no reconocido: {payload.method}")
@@ -67,6 +94,9 @@ async def solve_roots(payload: SolveRootsRequest) -> SolveRootsResponse:
             iterations=res.iterations,
             converged=res.converged,
             final_error=res.final_error,
+            error_type=res.error_type,
+            final_ea=res.final_ea,
+            final_er=res.final_er,
             table=res.table,
             derivative_used=res.derivative_used,
         )

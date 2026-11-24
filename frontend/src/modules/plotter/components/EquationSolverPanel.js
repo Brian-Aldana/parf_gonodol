@@ -1,23 +1,51 @@
+const COLUMN_LABELS = {
+  k: "k",
+  xk: "x_k",
+  x_next: "x_{k+1}",
+  fxk: "f(x_k)",
+  dfxk: "f'(x_k)",
+  dgxk: "|g'(x_k)|",
+  xl: "x_l",
+  xu: "x_u",
+  xr: "x_r",
+  fxr: "f(x_r)",
+  x0: "x_{k-1}",
+  x1: "x_k",
+  fx2: "f(x_{k+1})",
+  ea: "Ea",
+  er: "Er",
+  ep: "Ep (%)",
+};
+
+function formatCellValue(val) {
+  if (val === null || val === undefined) return "-";
+  if (typeof val !== "number") return val;
+  if (Number.isInteger(val)) return val.toString();
+  if (Math.abs(val) < 1e-4 && val !== 0) return val.toExponential(6);
+  return val.toFixed(6);
+}
+
 export function createEquationSolverPanel({ getExpression, onRootFound }) {
   const container = document.createElement("div");
   container.className = "solver-panel-container";
 
-  let methodCategory = "closed";
-  let selectedMethod = "bisection";
+  let methodCategory = "open";
+  let selectedMethod = "newton_raphson";
   let lastResultTable = [];
 
   container.innerHTML = `
     <div class="solver-category-switch">
-      <button type="button" class="category-btn is-active" data-cat="closed">Metodos Cerrados</button>
-      <button type="button" class="category-btn" data-cat="open">Metodos Abiertos</button>
+      <button type="button" class="category-btn" data-cat="closed">Metodos Cerrados</button>
+      <button type="button" class="category-btn is-active" data-cat="open">Metodos Abiertos</button>
     </div>
 
     <div class="solver-fields-group">
       <div class="form-row">
-        <label for="solver-method-select">Metodo:</label>
+        <label for="solver-method-select">Metodo de Resolucion:</label>
         <select id="solver-method-select" class="solver-select">
-          <option value="bisection">Biseccion</option>
-          <option value="false_position">Regla Falsa</option>
+          <option value="newton_raphson">Newton-Raphson</option>
+          <option value="fixed_point">Punto Fijo (g(x))</option>
+          <option value="secant">Secante</option>
         </select>
       </div>
 
@@ -25,8 +53,16 @@ export function createEquationSolverPanel({ getExpression, onRootFound }) {
 
       <div class="form-row-inline">
         <div class="param-col">
-          <label for="param-tolerance">Tolerancia (%):</label>
-          <input type="number" id="param-tolerance" class="solver-input" value="0.01" step="0.001" min="0.000001">
+          <label for="param-error-type">Criterio de Parada:</label>
+          <select id="param-error-type" class="solver-select">
+            <option value="absolute" selected>Error Absoluto (Ea)</option>
+            <option value="relative">Error Relativo (Er)</option>
+            <option value="percentage">Error Porcentual (Ep %)</option>
+          </select>
+        </div>
+        <div class="param-col">
+          <label for="param-tolerance">Tolerancia:</label>
+          <input type="number" id="param-tolerance" class="solver-input" value="0.001" step="0.0001" min="0.0000001">
         </div>
         <div class="param-col">
           <label for="param-max-iter">Max Iter:</label>
@@ -43,7 +79,7 @@ export function createEquationSolverPanel({ getExpression, onRootFound }) {
         <div class="result-meta-text" id="res-meta-val">Error: - | Iteraciones: -</div>
       </div>
       <div class="table-actions-bar">
-        <span class="table-title">Iteraciones Paso a Paso</span>
+        <span class="table-title">Tabla de Iteraciones</span>
         <button type="button" id="btn-copy-csv" class="btn-copy-csv">Copiar CSV</button>
       </div>
       <div class="iteration-table-wrapper">
@@ -58,6 +94,8 @@ export function createEquationSolverPanel({ getExpression, onRootFound }) {
   const catBtns = container.querySelectorAll(".category-btn");
   const methodSelect = container.querySelector("#solver-method-select");
   const paramsContainer = container.querySelector("#dynamic-params-container");
+  const errorTypeSelect = container.querySelector("#param-error-type");
+  const tolInput = container.querySelector("#param-tolerance");
   const btnRun = container.querySelector("#btn-run-solver");
   const resultBox = container.querySelector("#solver-result-box");
   const resRootVal = container.querySelector("#res-root-val");
@@ -85,28 +123,40 @@ export function createEquationSolverPanel({ getExpression, onRootFound }) {
     } else {
       methodSelect.innerHTML = `
         <option value="newton_raphson" ${selectedMethod === "newton_raphson" ? "selected" : ""}>Newton-Raphson</option>
+        <option value="fixed_point" ${selectedMethod === "fixed_point" ? "selected" : ""}>Punto Fijo (g(x))</option>
         <option value="secant" ${selectedMethod === "secant" ? "selected" : ""}>Secante</option>
       `;
       if (selectedMethod === "newton_raphson") {
         paramsContainer.innerHTML = `
           <div class="param-col">
             <label for="param-x0">Valor Inicial (x0):</label>
-            <input type="number" id="param-x0" class="solver-input" value="2.0" step="any">
+            <input type="number" id="param-x0" class="solver-input" value="1.5" step="any">
           </div>
           <div class="param-col">
             <label for="param-manual-df">Derivada f'(x) (opcional):</label>
             <input type="text" id="param-manual-df" class="solver-input" placeholder="Automatica con SymPy">
           </div>
         `;
+      } else if (selectedMethod === "fixed_point") {
+        paramsContainer.innerHTML = `
+          <div class="param-col">
+            <label for="param-x0">Valor Inicial (x0):</label>
+            <input type="number" id="param-x0" class="solver-input" value="1.5" step="any">
+          </div>
+          <div class="param-col">
+            <label for="param-gx">Funcion Iteradora g(x) (opcional):</label>
+            <input type="text" id="param-gx" class="solver-input" placeholder="Por defecto f(x) o expresion g(x)">
+          </div>
+        `;
       } else {
         paramsContainer.innerHTML = `
           <div class="param-col">
             <label for="param-x0">Punto 1 (x0):</label>
-            <input type="number" id="param-x0" class="solver-input" value="2.0" step="any">
+            <input type="number" id="param-x0" class="solver-input" value="1.0" step="any">
           </div>
           <div class="param-col">
             <label for="param-x1">Punto 2 (x1):</label>
-            <input type="number" id="param-x1" class="solver-input" value="3.0" step="any">
+            <input type="number" id="param-x1" class="solver-input" value="2.0" step="any">
           </div>
         `;
       }
@@ -128,36 +178,43 @@ export function createEquationSolverPanel({ getExpression, onRootFound }) {
     renderDynamicInputs();
   });
 
+  errorTypeSelect.addEventListener("change", (e) => {
+    if (e.target.value === "percentage") {
+      tolInput.value = "0.1";
+    } else {
+      tolInput.value = "0.001";
+    }
+  });
+
   function renderTable(table) {
     lastResultTable = table;
     if (!table || table.length === 0) return;
-    const keys = Object.keys(table[0]);
-    tableHead.innerHTML = `<tr>${keys.map((k) => `<th>${k}</th>`).join("")}</tr>`;
+    const rawKeys = Object.keys(table[0]);
+    tableHead.innerHTML = `<tr>${rawKeys.map((k) => `<th>${COLUMN_LABELS[k] || k}</th>`).join("")}</tr>`;
     tableBody.innerHTML = table
       .map(
         (row) =>
-          `<tr>${keys
-            .map((k) => {
-              const val = row[k];
-              if (val === null || val === undefined) return "-";
-              return typeof val === "number" ? val.toFixed(6) : val;
-            })
-            .map((v) => `<td>${v}</td>`)
+          `<tr>${rawKeys
+            .map((k) => `<td>${formatCellValue(row[k])}</td>`)
             .join("")}</tr>`
       )
       .join("");
   }
 
-  btnRun.addEventListener("click", async () => {
+  function collectPayload() {
     const expr = getExpression();
-    if (!expr) {
-      alert("Ingrese una funcion f(x) valida primero.");
-      return;
-    }
+    if (!expr) throw new Error("Ingrese una funcion f(x) valida primero.");
 
-    const tol = parseFloat(container.querySelector("#param-tolerance").value) || 0.01;
+    const tol = parseFloat(tolInput.value) || 0.001;
     const maxIter = parseInt(container.querySelector("#param-max-iter").value, 10) || 100;
-    const payload = { expression: expr, method: selectedMethod, tolerance: tol, max_iter: maxIter };
+    const errorType = errorTypeSelect.value;
+    const payload = {
+      expression: expr,
+      method: selectedMethod,
+      tolerance: tol,
+      max_iter: maxIter,
+      error_type: errorType,
+    };
 
     if (methodCategory === "closed") {
       payload.xl = parseFloat(container.querySelector("#param-xl").value);
@@ -166,14 +223,23 @@ export function createEquationSolverPanel({ getExpression, onRootFound }) {
       payload.x0 = parseFloat(container.querySelector("#param-x0").value);
       const mdf = container.querySelector("#param-manual-df").value.trim();
       if (mdf) payload.manual_df = mdf;
+    } else if (selectedMethod === "fixed_point") {
+      payload.x0 = parseFloat(container.querySelector("#param-x0").value);
+      const gxVal = container.querySelector("#param-gx").value.trim();
+      if (gxVal) payload.gx = gxVal;
     } else {
       payload.x0 = parseFloat(container.querySelector("#param-x0").value);
       payload.x1 = parseFloat(container.querySelector("#param-x1").value);
     }
+    return payload;
+  }
 
+  btnRun.addEventListener("click", async () => {
     try {
+      const payload = collectPayload();
       btnRun.disabled = true;
       btnRun.textContent = "Calculando...";
+
       const res = await fetch("/api/plot/solve-roots", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -187,8 +253,11 @@ export function createEquationSolverPanel({ getExpression, onRootFound }) {
 
       const data = await res.json();
       resultBox.classList.remove("is-hidden");
-      resRootVal.textContent = `Raiz: x = ${data.root.toFixed(6)}`;
-      resMetaVal.textContent = `Error final: ${data.final_error.toFixed(4)}% | Iteraciones: ${data.iterations}`;
+      resRootVal.textContent = `Raiz: x = ${formatCellValue(data.root)}`;
+
+      const eaStr = data.final_ea != null ? formatCellValue(data.final_ea) : "-";
+      const erStr = data.final_er != null ? formatCellValue(data.final_er) : "-";
+      resMetaVal.textContent = `Ea: ${eaStr} | Er: ${erStr} | Iteraciones: ${data.iterations}`;
       renderTable(data.table);
 
       if (typeof onRootFound === "function") {
@@ -204,10 +273,11 @@ export function createEquationSolverPanel({ getExpression, onRootFound }) {
 
   btnCopyCsv.addEventListener("click", () => {
     if (!lastResultTable || lastResultTable.length === 0) return;
-    const keys = Object.keys(lastResultTable[0]);
-    const csvRows = [keys.join(",")];
+    const rawKeys = Object.keys(lastResultTable[0]);
+    const headerRow = rawKeys.map((k) => COLUMN_LABELS[k] || k).join(",");
+    const csvRows = [headerRow];
     lastResultTable.forEach((row) => {
-      csvRows.push(keys.map((k) => row[k] ?? "").join(","));
+      csvRows.push(rawKeys.map((k) => row[k] ?? "").join(","));
     });
     navigator.clipboard.writeText(csvRows.join("\n"));
     btnCopyCsv.textContent = "Copiado!";

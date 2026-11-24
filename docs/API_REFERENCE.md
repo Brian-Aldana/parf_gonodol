@@ -126,44 +126,68 @@ Ejecuta algoritmos iterativos cerrados o abiertos para hallar la raiz $f(x) = 0$
   "method": "bisection",
   "xl": 2.0,
   "xu": 3.0,
-  "tolerance": 0.01,
+  "error_type": "absolute",
+  "tolerance": 0.001,
   "max_iter": 100
 }
 ```
 
-#### Solicitud con Metodo Abierto (Newton-Raphson o Secante)
+#### Solicitud con Metodo Abierto (Newton-Raphson, Punto Fijo o Secante)
 ```json
 {
-  "expression": "x^3 - 2*x - 5",
+  "expression": "x^4 - 2",
   "method": "newton_raphson",
-  "x0": 2.0,
+  "x0": 1.5,
   "manual_df": null,
-  "tolerance": 0.01,
+  "error_type": "absolute",
+  "tolerance": 0.001,
   "max_iter": 100
 }
 ```
+
+| Campo | Tipo | Requerido | Descripcion |
+|-------|------|-----------|-------------|
+| `expression` | string | Si | Funcion $f(x)$ o funcion iteradora $g(x)$ |
+| `method` | string | Si | `"bisection"`, `"false_position"`, `"newton_raphson"`, `"fixed_point"`, `"secant"` |
+| `error_type` | string | No | `"absolute"` ($E_a$), `"relative"` ($E_r$), `"percentage"` ($E_p$). Por defecto `"absolute"`. |
+| `tolerance` | float | No | Valor limite de parada (por defecto `0.001`) |
+| `max_iter` | integer | No | Maximo de iteraciones permitidas (por defecto `100`) |
+| `xl`, `xu` | float | Condicional | Requeridos en metodos cerrados |
+| `x0` | float | Condicional | Requerido en metodos abiertos |
+| `x1` | float | Condicional | Requerido en el metodo de la secante |
+| `gx` | string | No | Expresion $g(x)$ opcional para Punto Fijo |
+| `manual_df` | string | No | Derivada analitica manual opcional para Newton-Raphson |
 
 #### Respuesta Exitosa (`200 OK`)
 ```json
 {
-  "root": 2.09455148,
-  "iterations": 14,
-  "final_error": 0.007421,
+  "root": 1.18920712,
+  "iterations": 4,
+  "final_error": 0.00007869,
+  "error_type": "absolute",
+  "final_ea": 0.00007869,
+  "final_er": 0.00006617,
   "converged": true,
   "table": [
     {
-      "iter": 1,
-      "xl": 2.0,
-      "xu": 3.0,
-      "xr": 2.5,
-      "ea": null
+      "k": 0,
+      "xk": 1.5,
+      "fxk": 3.0625,
+      "dfxk": 13.5,
+      "x_next": 1.273148,
+      "ea": 0.226852,
+      "er": 0.178182,
+      "ep": 17.818182
     },
     {
-      "iter": 2,
-      "xl": 2.0,
-      "xu": 2.5,
-      "xr": 2.25,
-      "ea": 11.111111
+      "k": 3,
+      "xk": 1.189286,
+      "fxk": 0.000529,
+      "dfxk": 6.728507,
+      "x_next": 1.189207,
+      "ea": 0.00007869,
+      "er": 0.00006617,
+      "ep": 0.006617
     }
   ]
 }

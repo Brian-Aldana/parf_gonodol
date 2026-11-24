@@ -6,13 +6,19 @@ Este documento detalla los fundamentos matematicos, algoritmos y criterios de co
 
 ## 1. Criterios Generales de Parada y Estimacion de Error
 
-Para todos los metodos iterativos de busqueda de raices, el criterio de parada principal se basa en el **error relativo porcentual aproximado** ($|\epsilon_a|$):
+Para todos los metodos iterativos de busqueda de raices, el sistema permite seleccionar entre tres criterios de parada rigurosos:
 
-$$|\epsilon_a| = \left| \frac{x_r^{\text{actual}} - x_r^{\text{anterior}}}{x_r^{\text{actual}}} \right| \times 100\%$$
+1. **Error Absoluto Aproximado ($E_a$)**:
+   $$E_a = |x_{k+1} - x_k|$$
+   Condicion de parada: $E_a \le \text{tolerancia}$ (por ejemplo, $E_a < 10^{-3} = 0.001$).
+2. **Error Relativo Aproximado ($E_r$)**:
+   $$E_r = \frac{|x_{k+1} - x_k|}{|x_{k+1}|}$$
+   Condicion de parada: $E_r \le \text{tolerancia}$ (fraccional, sin multiplicador porcentual).
+3. **Error Relativo Porcentual ($E_p$)**:
+   $$E_p = E_r \times 100\% = \left| \frac{x_{k+1} - x_k}{x_{k+1}} \right| \times 100\%$$
+   Condicion de parada: $E_p \le \text{tolerancia}\%$.
 
-El algoritmo finaliza cuando se satisface una de las siguientes dos condiciones:
-1. $|\epsilon_a| \le \text{tolerancia}\%$ (convergencia exitosa).
-2. El numero de iteraciones alcanza el valor de `max_iter` sin satisfacer la tolerancia (limite de seguridad).
+El algoritmo finaliza cuando se satisface el criterio seleccionado o cuando el contador de iteraciones alcanza el valor limite de `max_iter`. La tabla de iteraciones reporta de forma simultanea $E_a$, $E_r$ y $E_p$ para facilitar la comparacion directa con la literatura cientifica.
 
 ---
 
@@ -60,27 +66,40 @@ Los metodos abiertos no requieren acotar la raiz entre dos valores de signo opue
 
 ### 3.1 Metodo de Newton-Raphson
 
-Basado en la expansion en serie de Taylor de primer orden alrededor de la estimacion actual $x_i$:
+Basado en la expansion en serie de Taylor de primer orden alrededor de la estimacion actual $x_k$:
 
 1. **Formula iterativa**:
-   $$x_{i+1} = x_i - \frac{f(x_i)}{f'(x_i)}$$
+   $$x_{k+1} = x_k - \frac{f(x_k)}{f'(x_k)}$$
 
 2. **Calculo de la derivada**:
    - **Modo Automatico (por defecto)**: El motor backend computa la derivada analitica exacta $f'(x)$ de manera simbolica utilizando SymPy antes de iniciar las iteraciones.
    - **Modo Manual**: El usuario puede proporcionar una expresion explicita para $f'(x)$ en la interfaz grafica.
 
 3. **Control de Singularidades**:
-   Si $|f'(x_i)| < 10^{-14}$, el calculo se interrumpe para prevenir divisiones por cero o desbordamientos numericos, reportando la singularidad de la pendiente.
+   Si $|f'(x_k)| < 10^{-12}$, el calculo se interrumpe para prevenir divisiones por cero o desbordamientos numericos, reportando la singularidad de la pendiente.
 
 4. **Propiedad de convergencia**:
-   Convergencia cuadratica en las proximidades de raices simples.
+   Convergencia cuadratica ($p = 2$) en las proximidades de raices simples, duplicando el numero de cifras significativas correctas en cada iteracion.
 
-### 3.2 Metodo de la Secante
+### 3.2 Metodo del Punto Fijo
 
-Aproxima la derivada de la funcion mediante diferencias finitas a partir de dos puntos iniciales $x_{i-1}$ y $x_i$:
+Transforma la ecuacion no lineal $f(x) = 0$ en la forma equivalente $x = g(x)$:
 
 1. **Formula iterativa**:
-   $$x_{i+1} = x_i - \frac{f(x_i)(x_{i-1} - x_i)}{f(x_{i-1}) - f(x_i)}$$
+   $$x_{k+1} = g(x_k)$$
+
+2. **Criterio de Convergencia (Teorema de Banach)**:
+   La sucesion converge hacia la raiz $x^*$ si existe un entorno donde la funcion iteradora satisface $|g'(x)| \le L < 1$. El orden de convergencia es lineal ($p = 1$).
+
+3. **Tabla de Iteraciones**:
+   El sistema evalua $x_{k+1} = g(x_k)$, computa analiticamente $|g'(x_k)|$ y calcula los errores $E_a$ y $E_r$ en cada paso.
+
+### 3.3 Metodo de la Secante
+
+Aproxima la derivada de la funcion mediante diferencias finitas a partir de dos puntos iniciales $x_{k-1}$ y $x_k$:
+
+1. **Formula iterativa**:
+   $$x_{k+1} = x_k - \frac{f(x_k)(x_{k-1} - x_k)}{f(x_{k-1}) - f(x_k)}$$
 
 2. **Ventaja**:
    No requiere el calculo ni la evaluacion de la derivada $f'(x)$, manteniendo un orden de convergencia superlineal aproximado a $\alpha \approx 1.618$ (razon aurea).

@@ -3,6 +3,11 @@ from typing import Callable, Any
 import math
 import sympy as sp
 from app.services.math_engine import _preprocess_expression
+from app.services.error_metrics import (
+    ErrorType,
+    compute_iteration_errors,
+    is_converged,
+)
 
 
 class RootFindingError(ValueError):
@@ -17,6 +22,9 @@ class RootFindingResult:
     final_error: float
     table: list[dict[str, Any]]
     derivative_used: str | None = None
+    error_type: str = "absolute"
+    final_ea: float | None = None
+    final_er: float | None = None
 
 
 def parse_function(expr_str: str) -> tuple[sp.Expr, Callable[[float], float]]:
@@ -72,14 +80,13 @@ def _eval_safe(f: Callable[[float], float], val: float) -> float:
         raise RootFindingError(f"Error evaluando f({val}): {exc}") from exc
 
 
-def _calc_rel_error(current: float, previous: float | None) -> float:
-    if previous is None or current == 0:
-        return 100.0
-    return abs((current - previous) / current) * 100.0
-
-
 def solve_bisection(
-    expr_str: str, xl: float, xu: float, tol: float = 0.01, max_iter: int = 100
+    expr_str: str,
+    xl: float,
+    xu: float,
+    tol: float = 0.001,
+    max_iter: int = 100,
+    error_type: ErrorType = "absolute",
 ) -> RootFindingResult:
     _, f = parse_function(expr_str)
     fl, fu = _eval_safe(f, xl), _eval_safe(f, xu)
@@ -92,37 +99,45 @@ def solve_bisection(
     table: list[dict[str, Any]] = []
     xr_prev: float | None = None
     xr = xl
+    errs = compute_iteration_errors(xr, None)
 
-    for i in range(1, max_iter + 1):
+    for k in range(max_iter):
         xr = (xl + xu) / 2.0
         fxr = _eval_safe(f, xr)
-        ea = _calc_rel_error(xr, xr_prev)
+        errs = compute_iteration_errors(xr, xr_prev)
 
         table.append({
-            "iter": i,
+            "k": k,
             "xl": xl,
             "xu": xu,
             "xr": xr,
             "fxr": fxr,
-            "ea": ea if i > 1 else None,
+            "ea": errs.ea if k > 0 else None,
+            "er": errs.er if k > 0 else None,
+            "ep": errs.ep if k > 0 else None,
         })
 
-        if ea <= tol or fxr == 0:
-            return RootFindingResult(xr, i, True, ea if i > 1 else 0.0, table)
+        if (k > 0 and is_converged(errs, tol, error_type)) or fxr == 0:
+            final_err = getattr(errs, "ea" if error_type == "absolute" else ("er" if error_type == "relative" else "ep"))
+            return RootFindingResult(xr, k + 1, True, final_err, table, error_type=error_type, final_ea=errs.ea, final_er=errs.er)
 
         if fl * fxr < 0:
-            xu = xr
-            fu = fxr
+            xu, fu = xr, fxr
         else:
-            xl = xr
-            fl = fxr
+            xl, fl = xr, fxr
         xr_prev = xr
 
-    return RootFindingResult(xr, max_iter, False, ea, table)
+    final_err = getattr(errs, "ea" if error_type == "absolute" else ("er" if error_type == "relative" else "ep"))
+    return RootFindingResult(xr, max_iter, False, final_err, table, error_type=error_type, final_ea=errs.ea, final_er=errs.er)
 
 
 def solve_false_position(
-    expr_str: str, xl: float, xu: float, tol: float = 0.01, max_iter: int = 100
+    expr_str: str,
+    xl: float,
+    xu: float,
+    tol: float = 0.001,
+    max_iter: int = 100,
+    error_type: ErrorType = "absolute",
 ) -> RootFindingResult:
     _, f = parse_function(expr_str)
     fl, fu = _eval_safe(f, xl), _eval_safe(f, xu)
@@ -135,45 +150,49 @@ def solve_false_position(
     table: list[dict[str, Any]] = []
     xr_prev: float | None = None
     xr = xl
+    errs = compute_iteration_errors(xr, None)
 
-    for i in range(1, max_iter + 1):
+    for k in range(max_iter):
         denom = fl - fu
         if abs(denom) < 1e-14:
             raise RootFindingError("Division por cero en el calculo de Regla Falsa")
 
         xr = xu - (fu * (xl - xu)) / denom
         fxr = _eval_safe(f, xr)
-        ea = _calc_rel_error(xr, xr_prev)
+        errs = compute_iteration_errors(xr, xr_prev)
 
         table.append({
-            "iter": i,
+            "k": k,
             "xl": xl,
             "xu": xu,
             "xr": xr,
             "fxr": fxr,
-            "ea": ea if i > 1 else None,
+            "ea": errs.ea if k > 0 else None,
+            "er": errs.er if k > 0 else None,
+            "ep": errs.ep if k > 0 else None,
         })
 
-        if ea <= tol or fxr == 0:
-            return RootFindingResult(xr, i, True, ea if i > 1 else 0.0, table)
+        if (k > 0 and is_converged(errs, tol, error_type)) or fxr == 0:
+            final_err = getattr(errs, "ea" if error_type == "absolute" else ("er" if error_type == "relative" else "ep"))
+            return RootFindingResult(xr, k + 1, True, final_err, table, error_type=error_type, final_ea=errs.ea, final_er=errs.er)
 
         if fl * fxr < 0:
-            xu = xr
-            fu = fxr
+            xu, fu = xr, fxr
         else:
-            xl = xr
-            fl = fxr
+            xl, fl = xr, fxr
         xr_prev = xr
 
-    return RootFindingResult(xr, max_iter, False, ea, table)
+    final_err = getattr(errs, "ea" if error_type == "absolute" else ("er" if error_type == "relative" else "ep"))
+    return RootFindingResult(xr, max_iter, False, final_err, table, error_type=error_type, final_ea=errs.ea, final_er=errs.er)
 
 
 def solve_newton_raphson(
     expr_str: str,
     x0: float,
     manual_df_str: str | None = None,
-    tol: float = 0.01,
+    tol: float = 0.001,
     max_iter: int = 100,
+    error_type: ErrorType = "absolute",
 ) -> RootFindingResult:
     f_sym, f = parse_function(expr_str)
     x_sym = sp.Symbol("x")
@@ -187,64 +206,142 @@ def solve_newton_raphson(
         df = sp.lambdify(x_sym, df_sym, modules=["math"])
 
     table: list[dict[str, Any]] = []
-    xi = x0
+    xk = x0
+    errs = compute_iteration_errors(xk, None)
 
-    for i in range(1, max_iter + 1):
-        fxi = _eval_safe(f, xi)
-        dfxi = _eval_safe(df, xi)
+    for k in range(max_iter):
+        fxk = _eval_safe(f, xk)
+        dfxk = _eval_safe(df, xk)
 
-        if abs(dfxi) < 1e-12:
-            raise RootFindingError(f"Derivada cercana a cero en iteracion {i} (x={xi:.6f})")
+        if abs(dfxk) < 1e-12:
+            raise RootFindingError(f"Derivada cercana a cero en iteracion {k} (x={xk:.6f})")
 
-        x_next = xi - (fxi / dfxi)
-        ea = _calc_rel_error(x_next, xi)
+        x_next = xk - (fxk / dfxk)
+        errs = compute_iteration_errors(x_next, xk)
 
         table.append({
-            "iter": i,
-            "xi": xi,
-            "fxi": fxi,
-            "dfxi": dfxi,
+            "k": k,
+            "xk": xk,
+            "fxk": fxk,
+            "dfxk": dfxk,
             "x_next": x_next,
-            "ea": ea,
+            "ea": errs.ea,
+            "er": errs.er,
+            "ep": errs.ep,
         })
 
-        if ea <= tol or fxi == 0:
-            return RootFindingResult(x_next, i, True, ea, table, derivative_used=df_str)
+        if is_converged(errs, tol, error_type) or fxk == 0:
+            final_err = getattr(errs, "ea" if error_type == "absolute" else ("er" if error_type == "relative" else "ep"))
+            return RootFindingResult(
+                x_next, k + 1, True, final_err, table,
+                derivative_used=df_str, error_type=error_type, final_ea=errs.ea, final_er=errs.er
+            )
 
-        xi = x_next
+        xk = x_next
 
-    return RootFindingResult(xi, max_iter, False, ea, table, derivative_used=df_str)
+    final_err = getattr(errs, "ea" if error_type == "absolute" else ("er" if error_type == "relative" else "ep"))
+    return RootFindingResult(
+        xk, max_iter, False, final_err, table,
+        derivative_used=df_str, error_type=error_type, final_ea=errs.ea, final_er=errs.er
+    )
 
 
 def solve_secant(
-    expr_str: str, x0: float, x1: float, tol: float = 0.01, max_iter: int = 100
+    expr_str: str,
+    x0: float,
+    x1: float,
+    tol: float = 0.001,
+    max_iter: int = 100,
+    error_type: ErrorType = "absolute",
 ) -> RootFindingResult:
     _, f = parse_function(expr_str)
     table: list[dict[str, Any]] = []
+    errs = compute_iteration_errors(x1, None)
 
-    for i in range(1, max_iter + 1):
+    for k in range(max_iter):
         f0 = _eval_safe(f, x0)
         f1 = _eval_safe(f, x1)
         denom = f1 - f0
 
         if abs(denom) < 1e-14:
-            raise RootFindingError(f"Denominador cercano a cero en iteracion {i}")
+            raise RootFindingError(f"Denominador cercano a cero en iteracion {k}")
 
         x2 = x1 - (f1 * (x1 - x0)) / denom
-        ea = _calc_rel_error(x2, x1)
+        errs = compute_iteration_errors(x2, x1)
 
         table.append({
-            "iter": i,
+            "k": k,
             "x0": x0,
             "x1": x1,
-            "x2": x2,
+            "x_next": x2,
             "fx2": _eval_safe(f, x2),
-            "ea": ea,
+            "ea": errs.ea,
+            "er": errs.er,
+            "ep": errs.ep,
         })
 
-        if ea <= tol:
-            return RootFindingResult(x2, i, True, ea, table)
+        if is_converged(errs, tol, error_type):
+            final_err = getattr(errs, "ea" if error_type == "absolute" else ("er" if error_type == "relative" else "ep"))
+            return RootFindingResult(
+                x2, k + 1, True, final_err, table,
+                error_type=error_type, final_ea=errs.ea, final_er=errs.er
+            )
 
         x0, x1 = x1, x2
 
-    return RootFindingResult(x1, max_iter, False, ea, table)
+    final_err = getattr(errs, "ea" if error_type == "absolute" else ("er" if error_type == "relative" else "ep"))
+    return RootFindingResult(
+        x1, max_iter, False, final_err, table,
+        error_type=error_type, final_ea=errs.ea, final_er=errs.er
+    )
+
+
+def solve_fixed_point(
+    gx_str: str,
+    x0: float,
+    tol: float = 0.001,
+    max_iter: int = 100,
+    error_type: ErrorType = "absolute",
+) -> RootFindingResult:
+    g_sym, g = parse_function(gx_str)
+    x_sym = sp.Symbol("x")
+
+    try:
+        dg_sym = sp.diff(g_sym, x_sym)
+        dg = sp.lambdify(x_sym, dg_sym, modules=["math"])
+    except Exception:
+        dg = None
+
+    table: list[dict[str, Any]] = []
+    xk = x0
+    errs = compute_iteration_errors(xk, None)
+
+    for k in range(max_iter):
+        x_next = _eval_safe(g, xk)
+        dgxk = abs(_eval_safe(dg, xk)) if dg else None
+        errs = compute_iteration_errors(x_next, xk)
+
+        table.append({
+            "k": k,
+            "xk": xk,
+            "x_next": x_next,
+            "dgxk": dgxk,
+            "ea": errs.ea,
+            "er": errs.er,
+            "ep": errs.ep,
+        })
+
+        if is_converged(errs, tol, error_type):
+            final_err = getattr(errs, "ea" if error_type == "absolute" else ("er" if error_type == "relative" else "ep"))
+            return RootFindingResult(
+                x_next, k + 1, True, final_err, table,
+                error_type=error_type, final_ea=errs.ea, final_er=errs.er
+            )
+
+        xk = x_next
+
+    final_err = getattr(errs, "ea" if error_type == "absolute" else ("er" if error_type == "relative" else "ep"))
+    return RootFindingResult(
+        xk, max_iter, False, final_err, table,
+        error_type=error_type, final_ea=errs.ea, final_er=errs.er
+    )

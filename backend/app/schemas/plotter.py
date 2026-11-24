@@ -23,13 +23,15 @@ class PlotPointsResponse(BaseModel):
 
 class SolveRootsRequest(BaseModel):
     expression: str
-    method: Literal["bisection", "false_position", "newton_raphson", "secant"]
+    method: Literal["bisection", "false_position", "newton_raphson", "secant", "fixed_point"]
     xl: float | None = None
     xu: float | None = None
     x0: float | None = None
     x1: float | None = None
+    gx: str | None = None
     manual_df: str | None = None
-    tolerance: float = Field(default=0.01, gt=0, le=100)
+    error_type: Literal["absolute", "relative", "percentage"] = "absolute"
+    tolerance: float = Field(default=0.001, gt=0, le=100)
     max_iter: int = Field(default=100, ge=1, le=1000)
 
 
@@ -38,6 +40,9 @@ class SolveRootsResponse(BaseModel):
     iterations: int
     converged: bool
     final_error: float
+    error_type: str = "absolute"
+    final_ea: float | None = None
+    final_er: float | None = None
     table: list[dict[str, Any]]
     derivative_used: str | None = None
 
