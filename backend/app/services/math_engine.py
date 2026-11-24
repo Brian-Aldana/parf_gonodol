@@ -1,6 +1,7 @@
 from decimal import Decimal, getcontext, InvalidOperation
 import ast
 import math
+import re
 import sympy
 
 
@@ -119,10 +120,21 @@ class SafeASTEvaluator(ast.NodeVisitor):
         return math.pow(base, exp)
 
 
+def _preprocess_expression(expr: str) -> str:
+    cleaned = expr.strip()
+    cleaned = cleaned.replace("×", "*").replace("÷", "/").replace("−", "-").replace("^", "**")
+    cleaned = re.sub(r"(?<![\w.])(\d+(?:\.\d+)?)\s*\(", r"\1*(", cleaned)
+    cleaned = re.sub(r"\)\s*\(", r")*(", cleaned)
+    cleaned = re.sub(r"\)\s*(\d+)", r")*\1", cleaned)
+    cleaned = re.sub(r"(?<![\w.])(\d+(?:\.\d+)?)\s*([a-zA-Z_]\w*)", r"\1*\2", cleaned)
+    cleaned = re.sub(r"\)\s*([a-zA-Z_]\w*)", r")*\1", cleaned)
+    return cleaned
+
+
 def evaluate(expression: str, angle_mode: str = "DEG", precision: int = 10) -> str:
     getcontext().prec = precision + 4
 
-    cleaned = expression.strip()
+    cleaned = _preprocess_expression(expression)
     if not cleaned:
         raise MathEvaluationError("Empty expression")
 

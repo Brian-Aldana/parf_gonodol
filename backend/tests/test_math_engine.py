@@ -108,3 +108,17 @@ class TestSecurityGuard:
     def test_unknown_function_blocked(self):
         with pytest.raises(UnsafeExpressionError, match="Function not allowed"):
             evaluate("open('file.txt')")
+
+
+class TestImplicitMultiplication:
+    def test_number_before_parenthesis(self):
+        assert evaluate("2(3)") == "6"
+
+    def test_parentheses_multiplication(self):
+        assert evaluate("(2)(3)") == "6"
+
+    def test_number_before_trig_function(self):
+        assert evaluate("2sin(30)", angle_mode="DEG") == "1"
+
+    def test_zero_before_trig_function(self):
+        assert evaluate("0sin(25)", angle_mode="DEG") == "0"

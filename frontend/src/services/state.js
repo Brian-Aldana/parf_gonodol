@@ -27,30 +27,45 @@ export function createCalculatorState() {
   function insertAtCursor(str, start = state.cursorPos, end = state.cursorPos) {
     const s = Math.min(start, end);
     const e = Math.max(start, end);
+    const isOperator = ["+", "−", "×", "÷", "^", "%"].includes(str);
 
     if (state.isEvaluated) {
-      if (!isNaN(str) || str === ".") {
+      if (isOperator) {
+        state.currentInput += str;
+        state.cursorPos = state.currentInput.length;
+      } else if (str === ".") {
+        state.currentInput = "0.";
+        state.expression = "";
+        state.cursorPos = 2;
+      } else {
         state.currentInput = str;
         state.expression = "";
         state.cursorPos = str.length;
-      } else {
-        state.currentInput += str;
-        state.cursorPos = state.currentInput.length;
       }
       state.isEvaluated = false;
       notify();
       return;
     }
 
-    if (state.currentInput === "0" && s === 0 && e <= 1 && !isNaN(str)) {
-      state.currentInput = str;
-      state.cursorPos = str.length;
-    } else {
-      const before = state.currentInput.slice(0, s);
-      const after = state.currentInput.slice(e);
-      state.currentInput = before + str + after;
-      state.cursorPos = s + str.length;
+    if (state.currentInput === "0") {
+      if (isOperator) {
+        state.currentInput = "0" + str;
+        state.cursorPos = state.currentInput.length;
+      } else if (str === ".") {
+        state.currentInput = "0.";
+        state.cursorPos = 2;
+      } else {
+        state.currentInput = str;
+        state.cursorPos = str.length;
+      }
+      notify();
+      return;
     }
+
+    const before = state.currentInput.slice(0, s);
+    const after = state.currentInput.slice(e);
+    state.currentInput = before + str + after;
+    state.cursorPos = s + str.length;
 
     notify();
   }
