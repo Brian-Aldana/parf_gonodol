@@ -1,3 +1,22 @@
+function formatMathExpression(expr) {
+  if (!expr || expr === "-") return "-";
+  let s = String(expr).trim();
+
+  const supers = {
+    "0": "⁰", "1": "¹", "2": "²", "3": "³", "4": "⁴",
+    "5": "⁵", "6": "⁶", "7": "⁷", "8": "⁸", "9": "⁹", "-": "⁻"
+  };
+
+  s = s.replace(/\*\*(-?\d+)/g, (_, p) => p.split("").map((c) => supers[c] || c).join(""));
+  s = s.replace(/(\d+)\s*\*\s*([a-zA-Z])/g, "$1$2");
+  s = s.replace(/(\d+)\s*\*\s*\(/g, "$1(");
+  s = s.replace(/\)\s*\*\s*([a-zA-Z\(])/g, ")$1");
+  s = s.replace(/\bsin\b/g, "sen");
+  s = s.replace(/\s*([+\-])\s*/g, " $1 ");
+  s = s.replace(/^\s*\+\s*/, "");
+  return s.trim();
+}
+
 export function createCalculusPanel({ getExpression }) {
   const container = document.createElement("div");
   container.className = "calculus-panel-container";
@@ -69,13 +88,25 @@ export function createCalculusPanel({ getExpression }) {
 
       const data = await res.json();
       resBox.classList.remove("is-hidden");
-      resDf.textContent = data.derivative || "-";
-      resD2f.textContent = data.second_derivative || "-";
-      resInt.textContent = data.definite_integral !== undefined ? String(data.definite_integral) : "-";
+      resDf.textContent = formatMathExpression(data.derivative);
+      resD2f.textContent = formatMathExpression(data.second_derivative);
+      resInt.textContent = data.definite_integral !== undefined
+        ? Number(data.definite_integral.toFixed(6)).toString()
+        : "-";
 
       if (data.extrema && data.extrema.length > 0) {
         resExtrema.innerHTML = data.extrema
-          .map((e) => `<div><strong>${e.kind}</strong> en (${e.x}, ${e.y})</div>`)
+          .map((e) => {
+            const isMax = e.kind.toLowerCase().includes("max");
+            const badgeClass = isMax ? "badge-max" : "badge-min";
+            const label = isMax ? "Maximo" : "Minimo";
+            return `
+              <div class="extremum-row">
+                <span class="extremum-tag ${badgeClass}">${label}</span>
+                <span class="extremum-coords">(${e.x}, ${e.y})</span>
+              </div>
+            `;
+          })
           .join("");
       } else {
         resExtrema.textContent = "Sin extremos relativos en el rango";

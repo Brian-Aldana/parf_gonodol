@@ -4,6 +4,9 @@
   display: flex;
   flex-direction: column;
   gap: 14px;
+  width: 100%;
+  overflow-x: hidden;
+  box-sizing: border-box;
 }
 
 .solver-category-switch {
@@ -25,6 +28,7 @@
   font-weight: 500;
   cursor: pointer;
   transition: all 0.15s ease;
+  text-align: center;
 }
 
 .category-btn.is-active {
@@ -52,6 +56,7 @@
 
 .param-col {
   flex: 1;
+  min-width: 0;
   display: flex;
   flex-direction: column;
   gap: 4px;
@@ -77,6 +82,8 @@
   font-family: var(--font-mono, monospace);
   outline: none;
   transition: border-color 0.15s ease;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .solver-select:focus,
@@ -118,6 +125,7 @@
   flex-direction: column;
   gap: 10px;
   margin-top: 4px;
+  overflow-x: hidden;
 }
 
 .is-hidden {
@@ -174,7 +182,7 @@
 }
 
 .iteration-table-wrapper {
-  max-height: 220px;
+  max-height: clamp(200px, 40vh, 500px);
   overflow-y: auto;
   overflow-x: auto;
   border: 1px solid #1e2638;
@@ -193,7 +201,7 @@
 .iteration-table th {
   background: #141b27;
   color: #94a3b8;
-  padding: 6px 8px;
+  padding: 6px 6px;
   position: sticky;
   top: 0;
   border-bottom: 1px solid #27354a;
@@ -201,7 +209,7 @@
 }
 
 .iteration-table td {
-  padding: 5px 8px;
+  padding: 5px 6px;
   border-bottom: 1px solid #182234;
   color: #e2e8f0;
   white-space: nowrap;
@@ -214,7 +222,7 @@
 .calc-item-card {
   background: #141b27;
   border: 1px solid #202b3c;
-  border-radius: 6px;
+  border-radius: 8px;
   padding: 10px 12px;
   display: flex;
   flex-direction: column;
@@ -223,14 +231,49 @@
 
 .calc-item-label {
   font-size: 11px;
-  font-weight: 600;
+  font-weight: 700;
   text-transform: uppercase;
   color: #94a3b8;
+  letter-spacing: 0.5px;
 }
 
 .calc-item-val {
   font-family: var(--font-mono, monospace);
-  font-size: 13px;
-  color: #e2e8f0;
+  font-size: 14px;
+  font-weight: 600;
+  color: #38bdf8;
   word-break: break-all;
+}
+
+.extremum-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 3px 0;
+}
+
+.extremum-tag {
+  font-size: 11px;
+  font-weight: 700;
+  padding: 2px 6px;
+  border-radius: 4px;
+  text-transform: uppercase;
+}
+
+.extremum-tag.badge-max {
+  background: rgba(56, 189, 248, 0.15);
+  color: #38bdf8;
+  border: 1px solid rgba(56, 189, 248, 0.3);
+}
+
+.extremum-tag.badge-min {
+  background: rgba(52, 211, 153, 0.15);
+  color: #34d399;
+  border: 1px solid rgba(52, 211, 153, 0.3);
+}
+
+.extremum-coords {
+  font-family: var(--font-mono, monospace);
+  font-size: 12px;
+  color: #cbd5e1;
 }

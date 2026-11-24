@@ -167,8 +167,8 @@ def run_qt_window(url: str, icon_path: str | None) -> bool:
 
         window = QMainWindow()
         window.setWindowTitle("Parf Gonodol")
-        window.resize(360, 580)
-        window.setMinimumSize(300, 460)
+        window.resize(1024, 700)
+        window.setMinimumSize(420, 560)
 
         if icon_path and os.path.exists(icon_path):
             window.setWindowIcon(QIcon(icon_path))

@@ -77,8 +77,8 @@ export function createPlotterView({ onBack, onOpenMenu }) {
   const nav = createTopNav(onBack, onOpenMenu);
   container.appendChild(nav);
 
-  const formulaBar = document.createElement("div");
-  formulaBar.className = "plotter-formula-bar";
+  const formulaSection = document.createElement("section");
+  formulaSection.className = "plotter-formula-section";
 
   const templateInput = createTemplateInput({
     initialValue: "x^3 - 2*x - 5",
@@ -89,6 +89,9 @@ export function createPlotterView({ onBack, onOpenMenu }) {
     onSelectTemplate: (t) => templateInput.insertTemplate(t),
   });
 
+  const formulaInputRow = document.createElement("div");
+  formulaInputRow.className = "plotter-formula-input-row";
+
   const btnPlot = document.createElement("button");
   btnPlot.type = "button";
   btnPlot.className = "btn-plot-curve";
@@ -98,11 +101,13 @@ export function createPlotterView({ onBack, onOpenMenu }) {
   const statusEl = document.createElement("span");
   statusEl.className = "plotter-status-text";
 
-  formulaBar.appendChild(toolbar);
-  formulaBar.appendChild(templateInput.element);
-  formulaBar.appendChild(btnPlot);
-  formulaBar.appendChild(statusEl);
-  container.appendChild(formulaBar);
+  formulaInputRow.appendChild(templateInput.element);
+  formulaInputRow.appendChild(btnPlot);
+  formulaInputRow.appendChild(statusEl);
+
+  formulaSection.appendChild(toolbar);
+  formulaSection.appendChild(formulaInputRow);
+  container.appendChild(formulaSection);
 
   const mainArea = document.createElement("div");
   mainArea.className = "plotter-main-content";

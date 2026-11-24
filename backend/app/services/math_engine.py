@@ -123,6 +123,12 @@ class SafeASTEvaluator(ast.NodeVisitor):
 def _preprocess_expression(expr: str) -> str:
     cleaned = expr.strip()
     cleaned = cleaned.replace("×", "*").replace("÷", "/").replace("−", "-").replace("^", "**")
+    cleaned = cleaned.replace("sen⁻¹", "asin").replace("cos⁻¹", "acos").replace("tan⁻¹", "atan")
+    cleaned = cleaned.replace("sin⁻¹", "asin").replace("cos⁻¹", "acos").replace("tan⁻¹", "atan")
+    cleaned = re.sub(r"\barcsen\b", "asin", cleaned)
+    cleaned = re.sub(r"\barccos\b", "acos", cleaned)
+    cleaned = re.sub(r"\barctan\b", "atan", cleaned)
+    cleaned = re.sub(r"\bsen\b", "sin", cleaned)
     cleaned = re.sub(r"(?<![\w.])(\d+(?:\.\d+)?)\s*\(", r"\1*(", cleaned)
     cleaned = re.sub(r"\)\s*\(", r")*(", cleaned)
     cleaned = re.sub(r"\)\s*(\d+)", r")*\1", cleaned)
