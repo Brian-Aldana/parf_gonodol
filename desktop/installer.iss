@@ -7,6 +7,7 @@ AppPublisher=Brian Aldana
 AppPublisherURL=https://github.com/Brian-Aldana/parf_gonodol
 AppSupportURL=https://github.com/Brian-Aldana/parf_gonodol
 AppUpdatesURL=https://github.com/Brian-Aldana/parf_gonodol/releases
+SourceDir=..
 DefaultDirName={autopf}\Parf Gonodol
 DisableProgramGroupPage=yes
 OutputDir=dist-installer
@@ -27,8 +28,8 @@ Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{
 Source: "dist\Parf-Gonodol\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
 
 [Icons]
-Name: "{autoprograms}\Parf Gonodol"; Filename: "{app}\Parf-Gonodol.exe"; IconFilename: "{app}\desktop\icon.ico"
-Name: "{autodesktop}\Parf Gonodol"; Filename: "{app}\Parf-Gonodol.exe"; IconFilename: "{app}\desktop\icon.ico"; Tasks: desktopicon
+Name: "{autoprograms}\Parf Gonodol"; Filename: "{app}\Parf-Gonodol.exe"
+Name: "{autodesktop}\Parf Gonodol"; Filename: "{app}\Parf-Gonodol.exe"; Tasks: desktopicon
 
 [Run]
 Filename: "{app}\Parf-Gonodol.exe"; Description: "{cm:LaunchProgram,Parf Gonodol}"; Flags: nowait postinstall skipifsilent

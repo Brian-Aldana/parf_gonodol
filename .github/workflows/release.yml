@@ -48,6 +48,7 @@ jobs:
         run: |
           .venv/Scripts/pyinstaller --noconfirm --onedir --windowed \
             --name "Parf-Gonodol" \
+            --icon "desktop/icon.ico" \
             --paths "backend" \
             --add-data "backend/app;app" \
             --add-data "frontend/dist;frontend/dist" \
