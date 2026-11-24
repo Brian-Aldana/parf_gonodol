@@ -5,7 +5,8 @@ import socket
 import threading
 import subprocess
 import traceback
-import uvicorn
+
+os.environ["QTWEBENGINE_CHROMIUM_FLAGS"] = "--disable-gpu --no-sandbox"
 
 if "GTK_MODULES" in os.environ:
     modules = [m for m in os.environ["GTK_MODULES"].split(":") if "appmenu" not in m]
@@ -27,6 +28,7 @@ else:
         sys.path.insert(0, backend_dir)
 
 from app.main import app
+import uvicorn
 
 
 def log_debug(msg: str):
@@ -45,7 +47,6 @@ def show_error_dialog(title: str, message: str):
         try:
             import ctypes
             ctypes.windll.user32.MessageBoxW(0, message, title, 0x10)
-            return
         except Exception:
             pass
 
@@ -75,38 +76,7 @@ def get_icon_path() -> str | None:
     return local_icon if os.path.exists(local_icon) else None
 
 
-def setup_window_icon():
-    icon_png = get_icon_path()
-    if not icon_png or not os.path.exists(icon_png):
-        return
-
-    try:
-        from PyQt6.QtWidgets import QApplication
-        from PyQt6.QtGui import QIcon
-        app_instance = QApplication.instance()
-        if app_instance:
-            icon = QIcon(icon_png)
-            app_instance.setWindowIcon(icon)
-            for widget in app_instance.topLevelWidgets():
-                widget.setWindowIcon(icon)
-    except Exception:
-        pass
-
-
-def install_message_filters():
-    try:
-        from PyQt6.QtCore import qInstallMessageHandler
-
-        def qt_message_handler(mode, context, message):
-            if "WebEnginePage" in message or "appmenu" in message:
-                return
-
-        qInstallMessageHandler(qt_message_handler)
-    except Exception:
-        pass
-
-
-def _find_windows_browser_binaries() -> list[str]:
+def _find_windows_browsers() -> list[str]:
     candidates = [
         os.path.expandvars(r"%ProgramFiles(x86)%\Microsoft\Edge\Application\msedge.exe"),
         os.path.expandvars(r"%ProgramFiles%\Microsoft\Edge\Application\msedge.exe"),
@@ -121,7 +91,7 @@ def _find_windows_browser_binaries() -> list[str]:
 def open_browser_app(url: str) -> bool:
     log_debug(f"Attempting browser fallback for {url}")
     if sys.platform.startswith("win"):
-        for binary in _find_windows_browser_binaries():
+        for binary in _find_windows_browsers():
             try:
                 subprocess.Popen([binary, f"--app={url}"])
                 log_debug(f"Launched browser app mode: {binary}")
@@ -148,45 +118,48 @@ def open_browser_app(url: str) -> bool:
         return False
 
 
-def _try_webview_engine(url: str, icon_png: str | None, gui_name: str | None) -> bool:
-    import webview
-    log_debug(f"Starting webview with gui={gui_name}")
-    webview.create_window(
-        title="Parf Gonodol",
-        url=url,
-        width=360,
-        height=580,
-        min_size=(300, 460),
-        resizable=True,
-        background_color="#161b24",
-    )
-    if gui_name:
-        webview.start(func=setup_window_icon, icon=icon_png, gui=gui_name)
-    else:
-        webview.start(func=setup_window_icon, icon=icon_png)
-    return True
-
-
-def launch_native_window(url: str, icon_png: str | None) -> bool:
-    if sys.platform.startswith("win"):
-        for engine in ["edgechromium", "qt", None]:
-            try:
-                return _try_webview_engine(url, icon_png, engine)
-            except Exception as exc:
-                log_debug(f"Webview engine '{engine}' failed: {exc}")
-        return False
-
+def run_qt_window(url: str, icon_path: str | None) -> bool:
     try:
-        return _try_webview_engine(url, icon_png, None)
+        from PyQt6.QtCore import QUrl, qInstallMessageHandler
+        from PyQt6.QtGui import QIcon
+        from PyQt6.QtWidgets import QApplication, QMainWindow
+        from PyQt6.QtWebEngineWidgets import QWebEngineView
+
+        def qt_message_filter(mode, context, message):
+            if "WebEnginePage" in message or "appmenu" in message:
+                return
+
+        qInstallMessageHandler(qt_message_filter)
+
+        qt_app = QApplication(sys.argv)
+        qt_app.setApplicationName("Parf Gonodol")
+
+        if icon_path and os.path.exists(icon_path):
+            qt_app.setWindowIcon(QIcon(icon_path))
+
+        window = QMainWindow()
+        window.setWindowTitle("Parf Gonodol")
+        window.resize(360, 580)
+        window.setMinimumSize(300, 460)
+
+        if icon_path and os.path.exists(icon_path):
+            window.setWindowIcon(QIcon(icon_path))
+
+        browser = QWebEngineView(window)
+        browser.setUrl(QUrl(url))
+        window.setCentralWidget(browser)
+
+        window.show()
+        log_debug("PyQt6 window displayed successfully")
+        qt_app.exec()
+        return True
     except Exception as exc:
-        log_debug(f"Native webview failed: {exc}\n{traceback.format_exc()}")
+        log_debug(f"PyQt6 native window failed: {exc}\n{traceback.format_exc()}")
         return False
 
 
 def main():
-    log_debug(f"Parf Gonodol desktop launcher started (frozen={getattr(sys, 'frozen', False)})")
-    install_message_filters()
-
+    log_debug(f"Starting Parf Gonodol desktop launcher (frozen={getattr(sys, 'frozen', False)})")
     port = find_free_port()
     log_debug(f"Allocated local port: {port}")
 
@@ -194,18 +167,18 @@ def main():
     server_thread.start()
 
     url = f"http://127.0.0.1:{port}"
-    time.sleep(0.4)
-    icon_png = get_icon_path()
+    time.sleep(0.3)
+    icon_path = get_icon_path()
 
-    window_opened = launch_native_window(url, icon_png)
-    if not window_opened:
-        log_debug("Native window failed. Falling back to external browser.")
+    opened = run_qt_window(url, icon_path)
+    if not opened:
+        log_debug("PyQt6 native window failed. Launching browser fallback.")
         browser_opened = open_browser_app(url)
         if not browser_opened:
             show_error_dialog(
                 "Error al iniciar Parf Gonodol",
                 "No fue posible abrir la interfaz gráfica ni el navegador web.\n"
-                "Revise el registro en %TEMP%\\parf_gonodol.log",
+                "Consulte el registro en %TEMP%\\parf_gonodol.log",
             )
             return
 
