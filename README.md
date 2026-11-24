@@ -36,14 +36,15 @@ Parf Gonodol combina la inmediatez y ergonomia de una calculadora cientifica de 
 - **Motor Seguro (AST + SymPy/Decimal)**: Resolucion exacta que previene errores de redondeo binario y bloquea codigo malicioso.
 
 ### 2. Graficador 2D y Resolucion de Ecuaciones
-- **Barra de Plantillas Matematicas**: Insercion asistida de fracciones ($\frac{\square}{\square}$), potencias ($\square^\square$), raices ($\sqrt{\square}$, $\sqrt[3]{\square}$, $\sqrt[\square]{\square}$), derivadas ($\frac{d}{dx}$, $\frac{d^2}{dx^2}$), integrales ($\int$, $\int_a^b$), sumatorias ($\sum$), limites ($\lim$) y matrices mediante cajas rellenables `[ □ ]` y navegacion con `Tab`.
-- **Lienzo 2D Interactivo**: Paneo por arrastre, zoom dinamico con rueda de raton, cuadricula adaptativa y marcado automatico de raices calculadas sobre la curva.
+- **Barra Superior de Plantillas y Trigonometria**: Insercion asistida de funciones trigonometricas directas e inversas (`sen`, `cos`, `tan`, `sen⁻¹`, `cos⁻¹`, `tan⁻¹`), fracciones ($\frac{\square}{\square}$), potencias ($\square^\square$), raices ($\sqrt{\square}$, $\sqrt[3]{\square}$, $\sqrt[\square]{\square}$), valor absoluto ($|\square|$), derivadas ($\frac{d}{dx}$, $\frac{d^2}{dx^2}$), integrales ($\int$, $\int_a^b$), sumatorias ($\sum$) y limites ($\lim$) con navegacion por cajas mediante `Tab`.
+- **Lienzo 2D Interactivo con Escalas**: Paneo por arrastre, zoom dinamico con rueda de raton y controles en pantalla (`+`, `−`, `↺`), cuadricula adaptativa con rotulado numerico en ejes $X$ e $Y$, indicador de coordenadas bajo el cursor y marcado de raices sobre la curva.
+- **Diseno Responsivo con Autolayout**: Adaptacion automatica de la interfaz segun el espacio disponible (disposicion lado a lado en pantallas amplias y apilamiento vertical fluido en ventanas compactas $\le 820\text{px}$), con scrollbars oscuros estilizados.
 - **Metodos de Resolucion de Raices**:
   - **Metodos Cerrados**: Biseccion y Regla Falsa (Regula Falsi) con verificacion automatica de cambio de signo en $[x_l, x_u]$.
   - **Metodos Abiertos**: Newton-Raphson (con derivada automatica simbolica por SymPy o derivada manual opcional) y Metodo de la Secante.
   - Criterio de convergencia por error relativo porcentual ($|\epsilon_a| \le tol\%$).
   - Tabla de iteraciones paso a paso con opcion de copiado instantaneo a formato CSV.
-- **Analisis de Calculo**: Evaluacion de primera y segunda derivada analitica, integral definida $\int_a^b f(x)\,dx$ y localizacion de maximos y minimos relativos en el rango.
+- **Analisis de Calculo Formateado**: Evaluacion de primera y segunda derivada analitica con formato matematico estilizado ($3x^2 - 2$), integral definida $\int_a^b f(x)\,dx$ y localizacion de maximos y minimos relativos con insignias visuales.
 - **Tabulacion de Valores**: Generacion de tablas $(x, f(x))$ con rango y paso $\Delta x$ personalizables y exportacion a CSV.
 
 ---

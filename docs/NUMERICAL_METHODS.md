@@ -108,11 +108,18 @@ El servicio de calculo analitico (`curve_service.py`) procesa funciones continua
    - Si $f''(x_c) < 0$: **Maximo local** en $(x_c, f(x_c))$.
    - Si $f''(x_c) = 0$: Punto de inflexion o prueba no concluyente.
 
+### 4.4 Formateo Matematico de Resultados
+Las derivadas y expresiones algebraicas devueltas por SymPy son formateadas antes de su presentacion al usuario:
+- **Potencias a Superindices**: Conversion de `**2` a `²`, `**3` a `³`, etc. (ejemplo: `3*x**2 - 2` $\rightarrow$ `3x² - 2`).
+- **Multiplicacion Implicita**: Supresion de asteriscos innecesarios entre coeficientes y variables (`6*x` $\rightarrow$ `6x`).
+- **Insignias de Extremos**: Presentacion de maximos y minimos locales con etiquetas de color y coordenadas claras.
+
 ---
 
 ## 5. Tabulacion y Muestreo de Curvas
 
 Para la generacion de tablas de valores y el renderizado en el lienzo:
-- Se evalua la expresion sobre una particion uniforme de $N$ muestras en $[x_{\min}, x_{\max}]$:
+- Se evalua la expresion sobre una particion uniforme de $N$ muestras en $[x_{\min}, x_{\max}]$ ($N \ge 2$):
   $$x_k = x_{\min} + k \cdot \Delta x, \quad \Delta x = \frac{x_{\max} - x_{\min}}{N - 1}$$
-- Los valores indefinidos o que producen indeterminaciones matematicas (divisiones entre cero, logaritmos de numeros no positivos) se identifican y devuelven como valores nulos (`None` / `Indefinido`), evitando fracturas en la ejecucion del lienzo visual.
+- Deteccion de discontinuidades: los saltos abruptos generados por asintotas verticales (como en $1/x$ o $\tan(x)$) son detectados y desacoplados para evitar el trazado de lineas verticales no deseadas en el lienzo.
+- Los valores indefinidos o indeterminados (divisiones por cero, logaritmos de numeros no positivos) se devuelven como nulos (`None` / `Indefinido`), garantizando continuidad visual sin errores.

@@ -43,13 +43,18 @@ Parf Gonodol es una suite cientifica modular construida bajo un patron de arquit
 - **Gestor de Estado Reactivo (`state.js`)**: Maquina de estados sincrona que procesa la entrada, posicion del cursor, recuperacion de memoria (`M+`, `M-`, `MR`, `MC`, `MS`) y atajos de teclado fisicos.
 
 ### 2.2 Modulo de Graficador 2D y Resolucion (`PlotterView.js`)
-- **Barra de Plantillas Matematicas (`MathTemplateToolbar.js`)**: Insercion de estructuras matematicas mediante cajas rellenables `[ □ ]` (fracciones, potencias, raices, derivadas, integrales, sumatorias, matrices).
-- **Entrada Estructurada (`TemplateInput.js`)**: Gestion de navegacion por cajas de insercion con `Tab` y `Shift+Tab`, sanitizando la expresion a sintaxis simbolica estandar al evaluar.
-- **Lienzo Interactivo (`CanvasPlotter.js`)**: Graficador en tiempo real sobre HTML5 Canvas con soporte para paneo por arrastre, zoom proporcional con rueda de raton, cuadricula adaptativa y marcadores de raices sobre el eje horizontal.
+- **Barra Superior de Plantillas y Trigonometria (`MathTemplateToolbar.js`)**: Insercion de estructuras algebraicas, calculo y funciones trigonometricas completas (`sen`, `cos`, `tan`, `sen⁻¹`, `cos⁻¹`, `tan⁻¹`, fracciones, potencias, raices, derivadas, integrales, sumatorias).
+- **Entrada Estructurada (`TemplateInput.js`)**: Gestion de navegacion por marcadores `□` con `Tab` y `Shift+Tab`, sanitizando la expresion a sintaxis simbolica estandar al evaluar.
+- **Lienzo Interactivo (`CanvasPlotter.js`)**: Graficador en tiempo real sobre HTML5 Canvas con soporte para paneo por arrastre, zoom proporcional con rueda de raton o controles en pantalla (`+`, `−`, `↺`), cuadricula adaptativa con rotulado numerico en ejes, indicador de coordenadas bajo el cursor y marcadores de raices sobre el eje horizontal.
 - **Paneles Laterales Especializados**:
   - `EquationSolverPanel.js`: Configuracion y ejecucion de metodos de busqueda de raices con tabla de iteraciones y copia en formato CSV.
-  - `CalculusPanel.js`: Calculo analitico de derivadas, integrales definidas y maximos/minimos relativos.
-  - `TableValuesPanel.js`: Generacion y exportacion tabular de pares $(x, f(x))$.
+  - `CalculusPanel.js`: Calculo analitico de derivadas con formateo matematico estilizado (`3x² - 2`), integrales definidas y clasificacion visual de maximos/minimos relativos.
+  - `TableValuesPanel.js`: Generacion y exportacion tabular de pares $(x, f(x))$ para cualquier rango y tamano de paso.
+
+### 2.3 Sistema de Autolayout y Diseno Responsivo
+- **Modo Pantalla Completa / Escritorio**: Distribucion horizontal de dos columnas: lienzo a la izquierda (`flex: 1`) y barra lateral fija a la derecha (`400px`).
+- **Modo Compacto / Ventana Reducida ($\le 820\text{px}$)**: Reordenamiento vertical automatico donde el lienzo conserva prioridad visual superior y los paneles de herramientas fluyen hacia la parte inferior sin superposicion.
+- **Scrollbars Estilizados**: Supresion total de desbordamiento horizontal (`overflow-x: hidden`) y reglas CSS de navegacion vertical sutil (`::-webkit-scrollbar` de 6px con contrastes neutros).
 
 ---
 
@@ -59,7 +64,8 @@ Parf Gonodol es una suite cientifica modular construida bajo un patron de arquit
 Para garantizar precision matematica absoluta sin vulnerabilidades de inyeccion de codigo (`eval()` arbitrario):
 1. **Analizador AST (`math_engine.py`)**: Valida que cada nodo del arbol sintactico pertenezca exclusivamente a operadores matematicos o funciones matematicas registradas en una lista blanca estricta.
 2. **Multiplicacion Implicita**: Un preprocesador con expresiones regulares y lookbehinds negativos detecta patrones como `2x`, `2(3)` o `2sin(x)` e inserta el operador de multiplicacion explicito sin alterar identificadores reservados (`log10`, `asin`).
-3. **Precision Arbitraria**: Conmutacion transparente entre evaluacion simbolica exacta con SymPy y precision decimal arbitraria con la biblioteca estandar `decimal`.
+3. **Normalizacion de Notacion Trigonometrica**: Mapeo transparente para expresiones en espanol y notacion de potencias inversas (`sen` -> `sin`, `arcsen` -> `asin`, `sen⁻¹` -> `asin`, `cos⁻¹` -> `acos`, `tan⁻¹` -> `atan`).
+4. **Precision Arbitraria**: Conmutacion transparente entre evaluacion simbolica exacta con SymPy y precision decimal arbitraria con la biblioteca estandar `decimal`.
 
 ### 3.2 Modulo de Metodos Numericos (`root_finding.py`)
 Implementa algoritmos desacoplados con contratos de entrada y salida consistentes:
@@ -89,7 +95,7 @@ Sondeo Activo de Socket (wait_for_server)
    -> Comprueba conexion TCP real hasta responder
         |
         v
-Instanciar QApplication & QWebEngineView
+Instanciar QApplication & QWebEngineView (1024x700 por defecto)
    -> Banderas de aislamiento de GPU (--disable-gpu --no-sandbox)
         |
         v

@@ -86,12 +86,19 @@ Computa un muestreo discreto de pares $(x, y)$ para una funcion en un rango dete
 #### Cuerpo de la Solicitud
 ```json
 {
-  "expression": "x^3 - 2*x - 5",
+  "expression": "sen(x) + e^x",
   "x_min": -5.0,
   "x_max": 5.0,
   "samples": 300
 }
 ```
+
+| Campo | Tipo | Requerido | Descripcion |
+|-------|------|-----------|-------------|
+| `expression` | string | Si | Funcion f(x) a evaluar. Admite sintaxis internacional (`sin`, `asin`) y en espanol (`sen`, `sen⁻¹`, `arcsen`), potencias (`^` o `**`), raices, e, pi. |
+| `x_min` | float | No | Limite inferior del dominio (por defecto `-10.0`). |
+| `x_max` | float | No | Limite superior del dominio (por defecto `10.0`). |
+| `samples` | integer | No | Cantidad de puntos a muestrear (entre `2` y `2000`, por defecto `400`). |
 
 #### Respuesta Exitosa (`200 OK`)
 ```json
