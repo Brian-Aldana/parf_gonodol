@@ -1,0 +1,165 @@
+.plotter-view-container {
+  display: flex;
+  flex-direction: column;
+  width: 100vw;
+  height: 100vh;
+  background: #0f141c;
+  color: #e2e8f0;
+  font-family: var(--font-sans, system-ui, sans-serif);
+  overflow: hidden;
+}
+
+.plotter-top-nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 16px;
+  background: #141a24;
+  border-bottom: 1px solid #1e2638;
+}
+
+.plotter-back-btn,
+.plotter-menu-btn {
+  background: #1c2333;
+  color: #cbd5e1;
+  border: 1px solid #2d374d;
+  border-radius: 6px;
+  padding: 6px 12px;
+  font-size: 13px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.plotter-back-btn:hover,
+.plotter-menu-btn:hover {
+  background: #252f45;
+  color: #ffffff;
+}
+
+.plotter-title {
+  font-family: var(--font-mono, monospace);
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  color: #38bdf8;
+  text-transform: uppercase;
+}
+
+.plotter-formula-bar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 16px;
+  background: #141a24;
+  border-bottom: 1px solid #1e2638;
+}
+
+.btn-plot-curve {
+  background: #2563eb;
+  color: #ffffff;
+  border: none;
+  border-radius: 8px;
+  padding: 9px 18px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background 0.15s ease;
+}
+
+.btn-plot-curve:hover {
+  background: #1d4ed8;
+}
+
+.plotter-main-content {
+  display: flex;
+  flex: 1;
+  overflow: hidden;
+}
+
+.plotter-canvas-area {
+  flex: 1;
+  position: relative;
+  display: flex;
+  background: #0a0d14;
+}
+
+.canvas-plotter-container {
+  width: 100%;
+  height: 100%;
+  position: relative;
+}
+
+.plotter-canvas {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+.plotter-canvas-controls {
+  position: absolute;
+  bottom: 16px;
+  right: 16px;
+  display: flex;
+  gap: 6px;
+  background: rgba(20, 26, 36, 0.85);
+  backdrop-filter: blur(6px);
+  padding: 4px;
+  border: 1px solid #2d374d;
+  border-radius: 6px;
+}
+
+.canvas-ctrl-btn {
+  background: #1c2333;
+  color: #cbd5e1;
+  border: 1px solid #2d374d;
+  border-radius: 4px;
+  width: 28px;
+  height: 28px;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.canvas-ctrl-btn:hover {
+  background: #252f45;
+  color: #ffffff;
+}
+
+.plotter-sidebar {
+  width: 380px;
+  display: flex;
+  flex-direction: column;
+  background: #121722;
+  border-left: 1px solid #1e2638;
+}
+
+.sidebar-tab-nav {
+  display: flex;
+  border-bottom: 1px solid #1e2638;
+  background: #141a24;
+}
+
+.sidebar-tab-btn {
+  flex: 1;
+  padding: 10px 8px;
+  background: transparent;
+  border: none;
+  border-bottom: 2px solid transparent;
+  color: #94a3b8;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.sidebar-tab-btn.is-active {
+  color: #38bdf8;
+  border-bottom-color: #38bdf8;
+  background: #18202e;
+}
+
+.sidebar-tab-content {
+  flex: 1;
+  overflow-y: auto;
+  padding: 16px;
+}
