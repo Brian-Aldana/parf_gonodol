@@ -1,47 +1,80 @@
 # Parf Gonodol
 
-Calculadora científica modular de alta precisión con arquitectura desacoplada en frontend y backend, interfaz ergonómica de precisión técnica y sistema de menú extensible para herramientas matemáticas.
+Calculadora cientifica de alta precision y suite de resolucion de ecuaciones con arquitectura desacoplada, display dual de precision tecnica, graficador 2D interactivo y soporte de metodos iterativos cerrados y abiertos.
 
-**Licencia**: MIT &nbsp;|&nbsp; **Python**: 3.10+ (gestor: `uv`) &nbsp;|&nbsp; **Frontend**: Web modular &nbsp;|&nbsp; **Plataformas**: Linux y Windows
+**Version**: 2.0.0 &nbsp;|&nbsp; **Licencia**: MIT &nbsp;|&nbsp; **Python**: 3.10+ (gestor: `uv`) &nbsp;|&nbsp; **Frontend**: Vanilla ES Modules (Vite) &nbsp;|&nbsp; **Desktop**: PyQt6 WebEngine
+
+---
+
+## Indice de Contenidos
+
+- [Acerca del Proyecto](#acerca-del-proyecto)
+- [Modulos y Caracteristicas Principales](#modulos-y-caracteristicas-principales)
+  - [1. Calculadora Cientifica Estandar](#1-calculadora-cientifica-estandar)
+  - [2. Graficador 2D y Resolucion de Ecuaciones](#2-graficador-2d-y-resolucion-de-ecuaciones)
+- [Documentacion Tecnica](#documentacion-tecnica)
+- [Descargas y Distribucion](#descargas-y-distribucion)
+- [Puesta en Marcha en Desarrollo](#puesta-en-marcha-en-desarrollo)
+- [Estructura del Proyecto](#estructura-del-proyecto)
+- [Licencia](#licencia)
 
 ---
 
 ## Acerca del Proyecto
 
-Parf Gonodol surge de la necesidad de contar con una calculadora científica que no sacrifique la precisión matemática ni la ergonomía visual. A diferencia de las utilidades genéricas de calculadora con redondeos imprecisos de punto flotante o interfaces rígidas, Parf Gonodol combina un motor de evaluación simbólica exacta (SymPy y Decimal) blindado contra inyecciones de código mediante AST, con una interfaz web moderna de dos líneas y un menú lateral plug-and-play diseñado para extenderse con nuevas herramientas especializadas.
+Parf Gonodol combina la inmediatez y ergonomia de una calculadora cientifica de escritorio con la potencia del computo simbolico (SymPy) y metodos numericos para la busqueda iterativa de raices. Su diseno desacoplado conecta una interfaz web reactiva sin dependencias pesadas con un nucleo backend blindado contra ejecucion de codigo arbitrario mediante analisis sintactico de AST.
 
 ---
 
-## Características Principales
+## Modulos y Caracteristicas Principales
 
-* **Display Dual de Precisión**: Línea superior para la expresión activa editable y línea inferior para resultados con cifras tabulares monoespaciadas (`font-variant-numeric: tabular-nums`).
-* **Teclado Científico Ergonómico**: Matriz de 5 columnas con operaciones aritméticas, funciones trigonométricas con conmutador DEG/RAD, potencias, raíces, logaritmos, factoriales y constantes ($\pi$, $e$).
-* **Menú Modular Extensible (Drawer)**: Botón de menú en cabecera con arquitectura desacoplada para conectar futuras herramientas (conversor de unidades, álgebra de matrices, graficador 2D y estadística).
-* **Motor Seguro (AST + SymPy/Decimal)**: Análisis sintáctico abstracto que descarta código arbitrario y resuelve expresiones matemáticas complejas sin errores de redondeo binario.
-* **Historial Persistente**: Almacenamiento local de operaciones con fecha, fórmula, resultado y modo angular, reutilizable mediante la tecla `Ans`.
-* **Experiencia de Escritorio Nativa**: Ejecución portable y sin barras de navegador mediante Webview, compatible con Linux y Windows.
+### 1. Calculadora Cientifica Estandar
+- **Display Dual**: Linea superior para la expresion algebraica en edicion y linea inferior para resultados con cifras monoespaciadas tabulares (`font-variant-numeric: tabular-nums`).
+- **Teclado Ergonomico**: Matriz con operaciones aritmeticas basicas, funciones trigonometricas con alternancia DEG/RAD, potencias, raices, logaritmos, constantes ($\pi$, $e$) y funciones secundarias (`2nd`).
+- **Gestion de Memoria**: Controles completos de memoria interna (`M+`, `M-`, `MR`, `MC`, `MS`) con popover flotante en tiempo real.
+- **Historial Persistente**: Registro de calculos con reincorporacion directa mediante la tecla `Ans`.
+- **Motor Seguro (AST + SymPy/Decimal)**: Resolucion exacta que previene errores de redondeo binario y bloquea codigo malicioso.
 
----
-
-## Instalación y Descargas
-
-Para los usuarios finales, Parf Gonodol se distribuye a través de GitHub Releases en 3 formatos independientes:
-
-1. **Instalador de Windows** (`Parf-Gonodol-Setup.exe`): Asistente de instalación tradicional que crea accesos directos en el menú Inicio, Escritorio y añade desinstalador.
-2. **Instalador de Linux** (`Parf-Gonodol.AppImage`): Paquete autónomo e integrado al menú de aplicaciones de cualquier distribución Linux moderna.
-3. **Versión Portable** (`Parf-Gonodol-Portable.zip`): Carpeta autocontenida que se ejecuta de inmediato sin instalación ni privilegios de administrador (ideal para unidades USB).
-
-### Requisitos del Sistema (Para Desarrollo)
-
-* Python 3.10 o superior con `uv`.
-* Node.js 18 o superior.
+### 2. Graficador 2D y Resolucion de Ecuaciones
+- **Barra de Plantillas Matematicas**: Insercion asistida de fracciones ($\frac{\square}{\square}$), potencias ($\square^\square$), raices ($\sqrt{\square}$, $\sqrt[3]{\square}$, $\sqrt[\square]{\square}$), derivadas ($\frac{d}{dx}$, $\frac{d^2}{dx^2}$), integrales ($\int$, $\int_a^b$), sumatorias ($\sum$), limites ($\lim$) y matrices mediante cajas rellenables `[ □ ]` y navegacion con `Tab`.
+- **Lienzo 2D Interactivo**: Paneo por arrastre, zoom dinamico con rueda de raton, cuadricula adaptativa y marcado automatico de raices calculadas sobre la curva.
+- **Metodos de Resolucion de Raices**:
+  - **Metodos Cerrados**: Biseccion y Regla Falsa (Regula Falsi) con verificacion automatica de cambio de signo en $[x_l, x_u]$.
+  - **Metodos Abiertos**: Newton-Raphson (con derivada automatica simbolica por SymPy o derivada manual opcional) y Metodo de la Secante.
+  - Criterio de convergencia por error relativo porcentual ($|\epsilon_a| \le tol\%$).
+  - Tabla de iteraciones paso a paso con opcion de copiado instantaneo a formato CSV.
+- **Analisis de Calculo**: Evaluacion de primera y segunda derivada analitica, integral definida $\int_a^b f(x)\,dx$ y localizacion de maximos y minimos relativos en el rango.
+- **Tabulacion de Valores**: Generacion de tablas $(x, f(x))$ con rango y paso $\Delta x$ personalizables y exportacion a CSV.
 
 ---
 
-## Uso y Puesta en Marcha en Desarrollo
+## Documentacion Tecnica
 
-### 1. Iniciar el Backend con `uv`
+Para consultar los detalles de diseno, formulaciones y contratos de la API, revisa los documentos dedicados:
 
+- [Arquitectura del Sistema](docs/ARCHITECTURE.md): Diagrama de componentes, comunicacion frontend-backend, sincronizacion de sockets en escritorio y manejo de empaquetado con PyInstaller y PyQt6.
+- [Metodos Numericos y Analisis de Calculo](docs/NUMERICAL_METHODS.md): Formulación matematica, ecuaciones iterativas, teoremas de parada y derivacion de cada algoritmo.
+- [Referencia de la API REST](docs/API_REFERENCE.md): Contratos de endpoints, schemas de peticion y respuesta JSON, codigos de estado y ejemplos.
+
+---
+
+## Descargas y Distribucion
+
+Parf Gonodol se empaqueta y publica automaticamente mediante GitHub Actions en cada etiqueta de version:
+
+1. **Instalador para Windows** (`Parf-Gonodol-Setup.exe`): Asistente clasico de Inno Setup que anade accesos directos al menu Inicio, Escritorio y desinstalador.
+2. **Version Portable para Windows** (`Parf-Gonodol-Portable-Windows.zip`): Carpeta comprimida autocontenida que se ejecuta de inmediato sin instalacion ni privilegios de administrador.
+3. **Paquete Autonomo para Linux** (`Parf-Gonodol-Linux.tar.gz`): Distribucion independiente con binario ejecutable y dependencias nativas empaquetadas.
+
+---
+
+## Puesta en Marcha en Desarrollo
+
+### Requisitos Previos
+- Python 3.10 o superior con el gestor `uv`.
+- Node.js 18 o superior (o Deno).
+
+### 1. Iniciar el Backend
 ```bash
 cd backend
 uv venv
@@ -49,96 +82,64 @@ source .venv/bin/activate       # En Windows: .venv\Scripts\activate
 uv pip install -r requirements.txt
 uv run uvicorn app.main:app --reload --port 8000
 ```
-
-La documentación interactiva de la API estará disponible en `http://localhost:8000/docs`.
+La documentacion Swagger interactiva estara disponible en `http://127.0.0.1:8000/docs`.
 
 ### 2. Iniciar el Frontend
-
 ```bash
-cd ../frontend
+cd frontend
 npm install
 npm run dev
 ```
+La interfaz web se cargara en `http://localhost:5173`.
 
-La interfaz se abrirá en `http://localhost:5173`.
-
----
-
-## Automatización de Releases (GitHub Actions)
-
-Los 3 instaladores finales se generan y publican automáticamente en la pestaña **Releases** de GitHub mediante un flujo de trabajo de integración continua (`.github/workflows/release.yml`):
-
-* Cada vez que se crea y sube una etiqueta de versión (por ejemplo, `v1.0.0`), GitHub Actions:
-  1. En una máquina virtual **Windows**: compila el ejecutable nativo y empaqueta el instalador `Parf-Gonodol-Setup.exe` y la versión portable `.zip`.
-  2. En una máquina virtual **Linux**: compila el paquete `Parf-Gonodol.AppImage`.
-  3. Adjunta los 3 archivos a la Release oficial de GitHub lista para descargar.
+### 3. Ejecutar Pruebas Automatizadas
+```bash
+./backend/.venv/bin/pytest
+```
 
 ---
 
-## Arquitectura del Proyecto
+## Estructura del Proyecto
 
 ```
 parf_gonodol/
-├── backend/                  # API FastAPI, motor matemático AST y persistencia
+├── backend/
 │   ├── app/
-│   │   ├── main.py           # Servidor FastAPI y montaje de estáticos
-│   │   ├── config.py         # Configuración y límites de precisión
-│   │   ├── services/         # math_engine.py y history_service.py
-│   │   ├── routers/          # calculator.py, history.py, modules.py
-│   │   └── schemas/          # Modelos Pydantic V2
-│   ├── requirements.txt      # Dependencias gestionadas con uv
-│   └── tests/                # Pruebas unitarias
+│   │   ├── main.py                 # Servidor FastAPI y montaje de estaticos
+│   │   ├── config.py               # Limites y configuracion de precision
+│   │   ├── routers/                # Endpoints REST (calculator, plotter, history)
+│   │   ├── schemas/                # Modelos Pydantic V2
+│   │   └── services/               # Motores de calculo (AST, root_finding, curve_service)
+│   ├── requirements.txt            # Dependencias Python
+│   └── tests/                      # Suite de pruebas unitarias con pytest
 │
-├── frontend/                 # Interfaz gráfica moderna
-│   ├── index.html            # Documento base
+├── frontend/
+│   ├── index.html                  # Plantilla HTML principal
 │   ├── src/
-│   │   ├── components/       # Display.js, Keypad.js, MenuDrawer.js
-│   │   ├── styles/           # tokens.css, buttons.css, calculator.css
-│   │   ├── services/         # api.js y state.js
-│   │   └── modules/          # moduleRegistry.js y extensiones
-│   └── package.json          # Configuración del frontend
+│   │   ├── components/             # Display.js, Keypad.js, MenuDrawer.js
+│   │   ├── modules/
+│   │   │   ├── moduleRegistry.js   # Registro de herramientas modulares
+│   │   │   └── plotter/            # PlotterView, Canvas, Solver, Plantillas
+│   │   ├── services/               # api.js y state.js
+│   │   └── styles/                 # Hojas de estilo modulares
+│   └── package.json                # Configuracion de Vite y dependencias
 │
-├── desktop/                  # Lanzador nativo de escritorio
-│   └── entrypoint.py         # Integración Webview multiplataforma
+├── desktop/
+│   ├── entrypoint.py               # Contenedor PyQt6 QWebEngineView con socket polling
+│   └── installer.iss               # Script de empaquetado para Inno Setup
 │
-├── .github/workflows/        # Automatización de compilación y releases
-│   └── release.yml
+├── docs/                           # Documentacion tecnica de referencia
+│   ├── ARCHITECTURE.md             # Arquitectura del sistema y empaquetado
+│   ├── NUMERICAL_METHODS.md        # Algoritmos y fundamentos matematicos
+│   └── API_REFERENCE.md            # Especificacion de endpoints REST
+│
+├── .github/workflows/
+│   └── release.yml                 # Compilacion y publicacion automatizada en CI/CD
 └── README.md
 ```
 
 ---
 
-## Extensión del Menú con Nuevos Módulos
-
-Agregar una nueva herramienta al menú lateral no requiere modificar el núcleo de la calculadora:
-
-1. **Definir el módulo en `frontend/src/modules/`**:
-   ```javascript
-   export const UnitConverterModule = {
-     id: "unit-converter",
-     name: "Conversor de Unidades",
-     description: "Conversión de magnitudes físicas y constantes",
-     render: (container) => {
-       container.innerHTML = `<div class="tool-content">Vista del conversor</div>`;
-     }
-   };
-   ```
-
-2. **Registrarlo en `frontend/src/modules/moduleRegistry.js`**:
-   Importa el objeto y agrégalo a la lista de módulos activos. La tarjeta aparecerá inmediatamente en el drawer del menú.
-
----
-
-## Hoja de Ruta
-
-- [ ] Soporte para cálculo de derivadas e integrales simbólicas en el motor backend.
-- [ ] Módulo oficial de Conversor de Unidades en el menú lateral.
-- [ ] Módulo de Álgebra Matricial (inversas, determinantes, producto punto).
-- [ ] Exportación avanzada de historial de cálculos a formatos CSV y JSON.
-- [ ] Pipeline automatizado en GitHub Actions para generar y firmar los 3 instaladores en cada tag.
-
----
-
 ## Licencia
 
-Parf Gonodol es un proyecto open source distribuido bajo la licencia **MIT**. Consulta el archivo [`LICENSE`](LICENSE) para más detalles.
+Distribuido bajo la licencia **MIT**. Consulta el archivo [LICENSE](LICENSE) para mas informacion.
