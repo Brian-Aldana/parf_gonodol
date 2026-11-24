@@ -15,7 +15,16 @@ import threading
 import subprocess
 import uvicorn
 
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "backend"))
+if getattr(sys, "frozen", False):
+    base_dir = getattr(sys, "_MEIPASS", os.path.dirname(sys.executable))
+    for candidate in [base_dir, os.path.join(base_dir, "backend")]:
+        if candidate not in sys.path:
+            sys.path.insert(0, candidate)
+else:
+    backend_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "backend"))
+    if backend_dir not in sys.path:
+        sys.path.insert(0, backend_dir)
+
 from app.main import app
 
 
