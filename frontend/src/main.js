@@ -3,12 +3,14 @@ import { Keypad } from "./components/Keypad.js";
 import { MenuDrawer } from "./components/MenuDrawer.js";
 import { createCalculatorState } from "./services/state.js";
 import { evaluateRemote, clearRemoteHistory } from "./services/api.js";
-import { registerModule } from "./modules/moduleRegistry.js";
+import { registerModule, getModules } from "./modules/moduleRegistry.js";
 import { INITIAL_MODULES } from "./modules/placeholders.js";
+import { createPlotterView } from "./modules/plotter/PlotterView.js";
 
 INITIAL_MODULES.forEach((mod) => registerModule(mod));
 
 const state = createCalculatorState();
+const calculatorEl = document.querySelector(".calculator");
 
 const keypadContainer = document.querySelector(".keypad");
 const badgeDeg = document.getElementById("badge-deg");
@@ -121,6 +123,38 @@ function handleKeyPress(key) {
   }
 
   display.focus();
+}
+
+const plotterView = createPlotterView({
+  onBack: () => {
+    plotterView.hide();
+    calculatorEl.style.display = "flex";
+    display.focus();
+  },
+  onOpenMenu: () => {
+    drawer.open();
+  }
+});
+document.body.appendChild(plotterView.element);
+
+const allModules = getModules();
+const calcMod = allModules.find((m) => m.id === "scientific-calculator");
+if (calcMod) {
+  calcMod.onSelect = () => {
+    drawer.close();
+    plotterView.hide();
+    calculatorEl.style.display = "flex";
+    display.focus();
+  };
+}
+
+const plotterMod = allModules.find((m) => m.id === "function-plotter");
+if (plotterMod) {
+  plotterMod.onSelect = () => {
+    drawer.close();
+    calculatorEl.style.display = "none";
+    plotterView.show();
+  };
 }
 
 const drawer = MenuDrawer({

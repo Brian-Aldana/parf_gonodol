@@ -1,5 +1,19 @@
 export const INITIAL_MODULES = [
   {
+    id: "scientific-calculator",
+    name: "Calculadora Cientifica",
+    description: "Modo estandar con precision arbitraria, historial y funciones avanzadas.",
+    status: "Activo",
+    onSelect: null
+  },
+  {
+    id: "function-plotter",
+    name: "Graficador de Funciones 2D",
+    description: "Visualizacion de curvas, resolucion de raices y analisis de calculo.",
+    status: "Activo",
+    onSelect: null
+  },
+  {
     id: "unit-converter",
     name: "Conversor de Unidades",
     description: "Longitud, masa, temperatura, presion y velocidad con precision cientifica.",
@@ -12,13 +26,6 @@ export const INITIAL_MODULES = [
     description: "Determinantes, matrices inversas, multiplicacion y sistemas de ecuaciones.",
     status: "Slot preparado",
     onSelect: () => alert("Modulo de Matrices preparado para implementacion.")
-  },
-  {
-    id: "function-plotter",
-    name: "Graficador de Funciones 2D",
-    description: "Visualizacion grafica de f(x), analisis de raices y maximos locales.",
-    status: "Slot preparado",
-    onSelect: () => alert("Modulo Graficador 2D preparado para implementacion.")
   },
   {
     id: "statistics",
