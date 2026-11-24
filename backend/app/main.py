@@ -4,7 +4,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from app.config import settings
-from app.routers import calculator, history, modules
+from app.routers import calculator, history, modules, plotter
 
 app = FastAPI(title=settings.app_title, docs_url="/docs", redoc_url=None)
 
@@ -18,6 +18,7 @@ app.add_middleware(
 app.include_router(calculator.router)
 app.include_router(history.router)
 app.include_router(modules.router)
+app.include_router(plotter.router)
 
 if getattr(sys, "frozen", False):
     exe_dir = os.path.dirname(sys.executable)
