@@ -51,15 +51,16 @@ export function createEquationSolverPanel({ getExpression, onRootFound }) {
 
       <div id="dynamic-params-container" class="dynamic-inputs-grid"></div>
 
+      <div class="form-row">
+        <label for="param-error-type">Criterio de Parada:</label>
+        <select id="param-error-type" class="solver-select">
+          <option value="absolute" selected>Error Absoluto (Ea)</option>
+          <option value="relative">Error Relativo (Er)</option>
+          <option value="percentage">Error Porcentual (Ep %)</option>
+        </select>
+      </div>
+
       <div class="form-row-inline">
-        <div class="param-col">
-          <label for="param-error-type">Criterio de Parada:</label>
-          <select id="param-error-type" class="solver-select">
-            <option value="absolute" selected>Error Absoluto (Ea)</option>
-            <option value="relative">Error Relativo (Er)</option>
-            <option value="percentage">Error Porcentual (Ep %)</option>
-          </select>
-        </div>
         <div class="param-col">
           <label for="param-tolerance">Tolerancia:</label>
           <input type="number" id="param-tolerance" class="solver-input" value="0.001" step="0.0001" min="0.0000001">
