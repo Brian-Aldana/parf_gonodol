@@ -6,6 +6,11 @@ import threading
 import subprocess
 import traceback
 
+if sys.stdout is None:
+    sys.stdout = open(os.devnull, "w")
+if sys.stderr is None:
+    sys.stderr = open(os.devnull, "w")
+
 os.environ["QTWEBENGINE_CHROMIUM_FLAGS"] = "--disable-gpu --no-sandbox"
 
 if "GTK_MODULES" in os.environ:
@@ -59,9 +64,32 @@ def find_free_port() -> int:
 
 def run_server(port: int):
     try:
-        uvicorn.run(app, host="127.0.0.1", port=port, log_level="warning")
+        log_debug(f"Starting uvicorn server on port {port}")
+        config = uvicorn.Config(
+            app=app,
+            host="127.0.0.1",
+            port=port,
+            log_config=None,
+            access_log=False,
+            log_level="error",
+        )
+        server = uvicorn.Server(config)
+        server.run()
     except Exception as exc:
         log_debug(f"Server error: {exc}\n{traceback.format_exc()}")
+
+
+def wait_for_server(port: int, timeout: float = 10.0) -> bool:
+    start_time = time.time()
+    while time.time() - start_time < timeout:
+        try:
+            with socket.create_connection(("127.0.0.1", port), timeout=0.2):
+                log_debug(f"Server ready on port {port} in {time.time() - start_time:.2f}s")
+                return True
+        except (OSError, ConnectionRefusedError):
+            time.sleep(0.1)
+    log_debug(f"Server failed to accept connections within {timeout}s on port {port}")
+    return False
 
 
 def get_icon_path() -> str | None:
@@ -167,9 +195,16 @@ def main():
     server_thread.start()
 
     url = f"http://127.0.0.1:{port}"
-    time.sleep(0.3)
-    icon_path = get_icon_path()
+    server_ready = wait_for_server(port, timeout=10.0)
+    if not server_ready:
+        show_error_dialog(
+            "Error al iniciar Parf Gonodol",
+            "El servidor interno de calculo no respondio a tiempo.\n"
+            "Consulte el registro en %TEMP%\\parf_gonodol.log",
+        )
+        return
 
+    icon_path = get_icon_path()
     opened = run_qt_window(url, icon_path)
     if not opened:
         log_debug("PyQt6 native window failed. Launching browser fallback.")
@@ -177,7 +212,7 @@ def main():
         if not browser_opened:
             show_error_dialog(
                 "Error al iniciar Parf Gonodol",
-                "No fue posible abrir la interfaz gráfica ni el navegador web.\n"
+                "No fue posible abrir la interfaz grafica ni el navegador web.\n"
                 "Consulte el registro en %TEMP%\\parf_gonodol.log",
             )
             return
