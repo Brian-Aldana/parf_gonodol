@@ -71,6 +71,19 @@
   background: #1d4ed8;
 }
 
+.plotter-status-text {
+  font-size: 12px;
+  color: #94a3b8;
+  max-width: 260px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.plotter-status-text.has-error {
+  color: #f87171;
+}
+
 .plotter-main-content {
   display: flex;
   flex: 1;
@@ -123,6 +136,21 @@
 .canvas-ctrl-btn:hover {
   background: #252f45;
   color: #ffffff;
+}
+
+.canvas-coord-badge {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  background: rgba(15, 23, 42, 0.75);
+  backdrop-filter: blur(4px);
+  border: 1px solid #1e293b;
+  border-radius: 4px;
+  padding: 4px 8px;
+  font-family: var(--font-mono, monospace);
+  font-size: 11px;
+  color: #94a3b8;
+  pointer-events: none;
 }
 
 .plotter-sidebar {

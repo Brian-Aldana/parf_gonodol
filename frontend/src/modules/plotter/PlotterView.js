@@ -95,9 +95,13 @@ export function createPlotterView({ onBack, onOpenMenu }) {
   btnPlot.textContent = "Graficar Curva";
   btnPlot.addEventListener("click", () => plotCurrentCurve());
 
+  const statusEl = document.createElement("span");
+  statusEl.className = "plotter-status-text";
+
   formulaBar.appendChild(toolbar);
   formulaBar.appendChild(templateInput.element);
   formulaBar.appendChild(btnPlot);
+  formulaBar.appendChild(statusEl);
   container.appendChild(formulaBar);
 
   const mainArea = document.createElement("div");
@@ -149,11 +153,21 @@ export function createPlotterView({ onBack, onOpenMenu }) {
           samples: 500,
         }),
       });
-      if (!res.ok) return;
+
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({ detail: "Error al evaluar funcion" }));
+        statusEl.textContent = err.detail || "Error al graficar";
+        statusEl.classList.add("has-error");
+        return;
+      }
+
+      statusEl.textContent = "";
+      statusEl.classList.remove("has-error");
       const data = await res.json();
       canvasPlotter.setPoints(data.points);
     } catch (err) {
-      console.error("Error al graficar:", err);
+      statusEl.textContent = "Error de conexion";
+      statusEl.classList.add("has-error");
     }
   }
 
@@ -161,7 +175,10 @@ export function createPlotterView({ onBack, onOpenMenu }) {
     element: container,
     show: () => {
       container.style.display = "flex";
-      plotCurrentCurve();
+      requestAnimationFrame(() => {
+        canvasPlotter.resize();
+        plotCurrentCurve();
+      });
     },
     hide: () => {
       container.style.display = "none";

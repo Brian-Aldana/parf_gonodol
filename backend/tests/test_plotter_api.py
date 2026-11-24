@@ -65,3 +65,23 @@ async def test_calculus_endpoint():
         data = res.json()
         assert "3*x**2 - 3" in data["derivative"]
         assert len(data["extrema"]) > 0
+
+
+@pytest.mark.asyncio
+async def test_plot_points_with_exp_and_brackets():
+    async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
+        res = await client.post(
+            "/api/plot/points",
+            json={"expression": "e^x + 2x", "x_min": -2.0, "x_max": 2.0, "samples": 50},
+        )
+        assert res.status_code == 200
+        data = res.json()
+        assert len(data["points"]) == 50
+        assert data["points"][0]["y"] is not None
+
+        res_bracket = await client.post(
+            "/api/plot/points",
+            json={"expression": "([ x ]) / ([ x + 1 ])", "x_min": 1.0, "x_max": 5.0, "samples": 20},
+        )
+        assert res_bracket.status_code == 200
+        assert len(res_bracket.json()["points"]) == 20

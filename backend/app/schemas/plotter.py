@@ -6,7 +6,7 @@ class PlotPointsRequest(BaseModel):
     expression: str
     x_min: float = -10.0
     x_max: float = 10.0
-    samples: int = Field(default=400, ge=50, le=2000)
+    samples: int = Field(default=400, ge=2, le=2000)
 
 
 class Point2D(BaseModel):

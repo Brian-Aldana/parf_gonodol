@@ -20,13 +20,13 @@ export function createTemplateInput({ initialValue = "x^3 - 2*x - 5", onChange, 
   function _findNextBox(backwards = false) {
     const val = inputEl.value;
     const pos = inputEl.selectionStart;
-    const target = "[ □ ]";
+    const target = "□";
 
     if (!backwards) {
       const idx = val.indexOf(target, pos);
       return idx !== -1 ? idx : val.indexOf(target);
     }
-    const idx = val.lastIndexOf(target, Math.max(0, pos - target.length));
+    const idx = val.lastIndexOf(target, Math.max(0, pos - 1));
     return idx !== -1 ? idx : val.lastIndexOf(target);
   }
 
@@ -34,7 +34,7 @@ export function createTemplateInput({ initialValue = "x^3 - 2*x - 5", onChange, 
     const idx = _findNextBox(backwards);
     if (idx !== -1) {
       inputEl.focus();
-      inputEl.setSelectionRange(idx + 2, idx + 3);
+      inputEl.setSelectionRange(idx, idx + 1);
       return true;
     }
     return false;
@@ -67,10 +67,10 @@ export function createTemplateInput({ initialValue = "x^3 - 2*x - 5", onChange, 
     const tpl = templateItem.template;
 
     inputEl.value = val.slice(0, start) + tpl + val.slice(end);
-    const firstBox = inputEl.value.indexOf("[ □ ]", start);
+    const firstBox = inputEl.value.indexOf("□", start);
     if (firstBox !== -1) {
       inputEl.focus();
-      inputEl.setSelectionRange(firstBox + 2, firstBox + 3);
+      inputEl.setSelectionRange(firstBox, firstBox + 1);
     } else {
       inputEl.selectionStart = inputEl.selectionEnd = start + tpl.length;
     }

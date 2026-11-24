@@ -21,14 +21,38 @@ class RootFindingResult:
 
 def parse_function(expr_str: str) -> tuple[sp.Expr, Callable[[float], float]]:
     x = sp.Symbol("x")
-    cleaned = _preprocess_expression(expr_str)
+    cleaned = expr_str.strip().replace("[", "(").replace("]", ")")
+    cleaned = _preprocess_expression(cleaned)
     try:
-        expr_sym = sp.sympify(cleaned)
+        expr_sym = sp.sympify(
+            cleaned,
+            locals={
+                "e": sp.E,
+                "E": sp.E,
+                "pi": sp.pi,
+                "PI": sp.pi,
+                "ln": sp.log,
+                "log": sp.log,
+                "cbrt": lambda a: a ** (sp.Rational(1, 3)),
+            },
+        )
     except Exception as exc:
         raise RootFindingError(f"Expresion matematica invalida: {exc}") from exc
 
+    math_modules = [
+        "math",
+        {
+            "e": math.e,
+            "pi": math.pi,
+            "log10": math.log10,
+            "log2": math.log2,
+            "math": math,
+            "Abs": abs,
+        },
+    ]
+
     try:
-        f_callable = sp.lambdify(x, expr_sym, modules=["math"])
+        f_callable = sp.lambdify(x, expr_sym, modules=math_modules)
     except Exception as exc:
         raise RootFindingError(f"No fue posible compilar la funcion f(x): {exc}") from exc
 
@@ -40,9 +64,10 @@ def _eval_safe(f: Callable[[float], float], val: float) -> float:
         res = f(val)
         if isinstance(res, complex):
             raise RootFindingError(f"Evaluacion en x={val} arrojo un valor complejo")
-        if math.isnan(res) or math.isinf(res):
+        num = float(res)
+        if math.isnan(num) or math.isinf(num):
             raise RootFindingError(f"Evaluacion en x={val} no arrojo un numero real finito")
-        return float(res)
+        return num
     except Exception as exc:
         raise RootFindingError(f"Error evaluando f({val}): {exc}") from exc
 

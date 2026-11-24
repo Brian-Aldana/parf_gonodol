@@ -18,12 +18,14 @@ def generate_plot_points(
         x_val = x_min + i * step
         try:
             y_val = f(x_val)
-            if isinstance(y_val, complex) or math.isnan(y_val) or math.isinf(y_val):
+            if isinstance(y_val, complex):
                 points.append({"x": round(x_val, 6), "y": None})
-            elif abs(y_val) > 1e6:
+                continue
+            num = float(y_val)
+            if math.isnan(num) or math.isinf(num) or abs(num) > 1e6:
                 points.append({"x": round(x_val, 6), "y": None})
             else:
-                points.append({"x": round(x_val, 6), "y": round(float(y_val), 6)})
+                points.append({"x": round(x_val, 6), "y": round(num, 6)})
         except Exception:
             points.append({"x": round(x_val, 6), "y": None})
 
