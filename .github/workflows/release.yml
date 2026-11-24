@@ -69,13 +69,18 @@ jobs:
           choco install innosetup -y
           iscc desktop/installer.iss
 
+      - name: Stage Windows Release Assets
+        shell: bash
+        run: |
+          mkdir -p release-windows
+          cp dist/Parf-Gonodol-Portable-Windows.zip release-windows/
+          cp dist-installer/Parf-Gonodol-Setup.exe release-windows/
+
       - name: Upload Windows Artifacts
         uses: actions/upload-artifact@v4
         with:
           name: windows-release
-          path: |
-            dist/Parf-Gonodol-Portable-Windows.zip
-            dist-installer/Parf-Gonodol-Setup.exe
+          path: release-windows/*
 
   build-linux:
     runs-on: ubuntu-latest
@@ -121,11 +126,16 @@ jobs:
           cd dist
           tar -czvf Parf-Gonodol-Linux.tar.gz Parf-Gonodol
 
+      - name: Stage Linux Release Assets
+        run: |
+          mkdir -p release-linux
+          cp dist/Parf-Gonodol-Linux.tar.gz release-linux/
+
       - name: Upload Linux Artifacts
         uses: actions/upload-artifact@v4
         with:
           name: linux-release
-          path: dist/Parf-Gonodol-Linux.tar.gz
+          path: release-linux/*
 
   publish-release:
     needs: [build-windows, build-linux]
@@ -143,7 +153,8 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           files: |
-            release-artifacts/windows-release/*.zip
-            release-artifacts/windows-release/*.exe
-            release-artifacts/linux-release/*.tar.gz
+            release-artifacts/**/*.zip
+            release-artifacts/**/*.exe
+            release-artifacts/**/*.tar.gz
+          overwrite: true
           generate_release_notes: true
