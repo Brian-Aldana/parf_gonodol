@@ -20,10 +20,14 @@ app.include_router(history.router)
 app.include_router(modules.router)
 
 if getattr(sys, "frozen", False):
-    base_dir = getattr(sys, "_MEIPASS", os.path.dirname(sys.executable))
-    frontend_dist = os.path.join(base_dir, "frontend", "dist")
-    if not os.path.isdir(frontend_dist):
-        frontend_dist = os.path.join(os.path.dirname(sys.executable), "frontend", "dist")
+    exe_dir = os.path.dirname(sys.executable)
+    base_dir = getattr(sys, "_MEIPASS", exe_dir)
+    frontend_candidates = [
+        os.path.join(base_dir, "frontend", "dist"),
+        os.path.join(exe_dir, "frontend", "dist"),
+        os.path.join(exe_dir, "_internal", "frontend", "dist"),
+    ]
+    frontend_dist = next((p for p in frontend_candidates if os.path.isdir(p)), frontend_candidates[0])
 else:
     frontend_dist = os.path.join(os.path.dirname(__file__), "..", settings.frontend_dist)
 

@@ -1,7 +1,12 @@
 import os
 import sys
+import time
+import socket
+import threading
+import subprocess
+import traceback
+import uvicorn
 
-# Silenciar advertencias de modulos opcionales del sistema de escritorio GTK
 if "GTK_MODULES" in os.environ:
     modules = [m for m in os.environ["GTK_MODULES"].split(":") if "appmenu" not in m]
     if modules:
@@ -9,16 +14,12 @@ if "GTK_MODULES" in os.environ:
     else:
         os.environ.pop("GTK_MODULES", None)
 
-import time
-import socket
-import threading
-import subprocess
-import uvicorn
-
 if getattr(sys, "frozen", False):
-    base_dir = getattr(sys, "_MEIPASS", os.path.dirname(sys.executable))
-    for candidate in [base_dir, os.path.join(base_dir, "backend")]:
-        if candidate not in sys.path:
+    exe_dir = os.path.dirname(sys.executable)
+    meipass = getattr(sys, "_MEIPASS", exe_dir)
+    internal_dir = os.path.join(exe_dir, "_internal")
+    for candidate in [meipass, internal_dir, exe_dir, os.path.join(meipass, "backend")]:
+        if os.path.exists(candidate) and candidate not in sys.path:
             sys.path.insert(0, candidate)
 else:
     backend_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "backend"))
@@ -28,6 +29,27 @@ else:
 from app.main import app
 
 
+def log_debug(msg: str):
+    try:
+        log_dir = os.environ.get("TEMP", os.path.expanduser("~"))
+        log_file = os.path.join(log_dir, "parf_gonodol.log")
+        with open(log_file, "a", encoding="utf-8") as f:
+            f.write(f"[{time.strftime('%Y-%m-%d %H:%M:%S')}] {msg}\n")
+    except Exception:
+        pass
+
+
+def show_error_dialog(title: str, message: str):
+    log_debug(f"FATAL: {title} - {message}")
+    if sys.platform.startswith("win"):
+        try:
+            import ctypes
+            ctypes.windll.user32.MessageBoxW(0, message, title, 0x10)
+            return
+        except Exception:
+            pass
+
+
 def find_free_port() -> int:
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
         s.bind(("127.0.0.1", 0))
@@ -35,41 +57,27 @@ def find_free_port() -> int:
 
 
 def run_server(port: int):
-    uvicorn.run(app, host="127.0.0.1", port=port, log_level="warning")
+    try:
+        uvicorn.run(app, host="127.0.0.1", port=port, log_level="warning")
+    except Exception as exc:
+        log_debug(f"Server error: {exc}\n{traceback.format_exc()}")
 
 
-def open_browser_app(url: str):
-    if sys.platform.startswith("win"):
-        try:
-            subprocess.run(["cmd", "/c", "start", "msedge", f"--app={url}"], check=True)
-            return
-        except Exception:
-            pass
-    elif sys.platform.startswith("linux"):
-        for browser in ["google-chrome", "chromium", "brave-browser"]:
-            try:
-                subprocess.Popen([browser, f"--app={url}"])
-                return
-            except FileNotFoundError:
-                continue
-
-    import webbrowser
-    webbrowser.open(url)
-
-
-def get_icon_path() -> str:
+def get_icon_path() -> str | None:
     if getattr(sys, "frozen", False):
-        base_dir = getattr(sys, "_MEIPASS", os.path.dirname(sys.executable))
-        icon_path = os.path.join(base_dir, "desktop", "icon.png")
-        if os.path.exists(icon_path):
-            return icon_path
-        return os.path.join(os.path.dirname(sys.executable), "desktop", "icon.png")
-    return os.path.abspath(os.path.join(os.path.dirname(__file__), "icon.png"))
+        exe_dir = os.path.dirname(sys.executable)
+        base_dir = getattr(sys, "_MEIPASS", exe_dir)
+        for folder in [base_dir, exe_dir, os.path.join(exe_dir, "_internal")]:
+            icon_file = os.path.join(folder, "desktop", "icon.png")
+            if os.path.exists(icon_file):
+                return icon_file
+    local_icon = os.path.abspath(os.path.join(os.path.dirname(__file__), "icon.png"))
+    return local_icon if os.path.exists(local_icon) else None
 
 
 def setup_window_icon():
     icon_png = get_icon_path()
-    if not os.path.exists(icon_png):
+    if not icon_png or not os.path.exists(icon_png):
         return
 
     try:
@@ -81,17 +89,6 @@ def setup_window_icon():
             app_instance.setWindowIcon(icon)
             for widget in app_instance.topLevelWidgets():
                 widget.setWindowIcon(icon)
-            return
-    except Exception:
-        pass
-
-    try:
-        import sys
-        if "gi.repository.Gtk" in sys.modules:
-            from gi.repository import Gtk
-            Gtk.Window.set_default_icon_from_file(icon_png)
-            for win in Gtk.Window.list_toplevels():
-                win.set_icon_from_file(icon_png)
     except Exception:
         pass
 
@@ -109,34 +106,109 @@ def install_message_filters():
         pass
 
 
+def _find_windows_browser_binaries() -> list[str]:
+    candidates = [
+        os.path.expandvars(r"%ProgramFiles(x86)%\Microsoft\Edge\Application\msedge.exe"),
+        os.path.expandvars(r"%ProgramFiles%\Microsoft\Edge\Application\msedge.exe"),
+        os.path.expandvars(r"%LocalAppData%\Microsoft\Edge\Application\msedge.exe"),
+        os.path.expandvars(r"%ProgramFiles%\Google\Chrome\Application\chrome.exe"),
+        os.path.expandvars(r"%ProgramFiles(x86)%\Google\Chrome\Application\chrome.exe"),
+        os.path.expandvars(r"%LocalAppData%\Google\Chrome\Application\chrome.exe"),
+    ]
+    return [p for p in candidates if os.path.exists(p)]
+
+
+def open_browser_app(url: str) -> bool:
+    log_debug(f"Attempting browser fallback for {url}")
+    if sys.platform.startswith("win"):
+        for binary in _find_windows_browser_binaries():
+            try:
+                subprocess.Popen([binary, f"--app={url}"])
+                log_debug(f"Launched browser app mode: {binary}")
+                return True
+            except Exception as exc:
+                log_debug(f"Failed to launch {binary}: {exc}")
+
+    if sys.platform.startswith("linux"):
+        for browser in ["google-chrome", "chromium", "brave-browser"]:
+            try:
+                subprocess.Popen([browser, f"--app={url}"])
+                log_debug(f"Launched Linux browser: {browser}")
+                return True
+            except FileNotFoundError:
+                continue
+
+    try:
+        import webbrowser
+        webbrowser.open(url)
+        log_debug("Launched system default webbrowser")
+        return True
+    except Exception as exc:
+        log_debug(f"Default webbrowser failed: {exc}")
+        return False
+
+
+def _try_webview_engine(url: str, icon_png: str | None, gui_name: str | None) -> bool:
+    import webview
+    log_debug(f"Starting webview with gui={gui_name}")
+    webview.create_window(
+        title="Parf Gonodol",
+        url=url,
+        width=360,
+        height=580,
+        min_size=(300, 460),
+        resizable=True,
+        background_color="#161b24",
+    )
+    if gui_name:
+        webview.start(func=setup_window_icon, icon=icon_png, gui=gui_name)
+    else:
+        webview.start(func=setup_window_icon, icon=icon_png)
+    return True
+
+
+def launch_native_window(url: str, icon_png: str | None) -> bool:
+    if sys.platform.startswith("win"):
+        for engine in ["edgechromium", "qt", None]:
+            try:
+                return _try_webview_engine(url, icon_png, engine)
+            except Exception as exc:
+                log_debug(f"Webview engine '{engine}' failed: {exc}")
+        return False
+
+    try:
+        return _try_webview_engine(url, icon_png, None)
+    except Exception as exc:
+        log_debug(f"Native webview failed: {exc}\n{traceback.format_exc()}")
+        return False
+
+
 def main():
+    log_debug(f"Parf Gonodol desktop launcher started (frozen={getattr(sys, 'frozen', False)})")
     install_message_filters()
+
     port = find_free_port()
+    log_debug(f"Allocated local port: {port}")
+
     server_thread = threading.Thread(target=run_server, args=(port,), daemon=True)
     server_thread.start()
 
     url = f"http://127.0.0.1:{port}"
     time.sleep(0.4)
-
     icon_png = get_icon_path()
 
-    try:
-        import webview
-        window = webview.create_window(
-            title="Parf Gonodol",
-            url=url,
-            width=360,
-            height=580,
-            min_size=(300, 460),
-            resizable=True,
-            background_color="#161b24"
-        )
-        webview.start(
-            func=setup_window_icon,
-            icon=icon_png if os.path.exists(icon_png) else None
-        )
-    except Exception:
-        open_browser_app(url)
+    window_opened = launch_native_window(url, icon_png)
+    if not window_opened:
+        log_debug("Native window failed. Falling back to external browser.")
+        browser_opened = open_browser_app(url)
+        if not browser_opened:
+            show_error_dialog(
+                "Error al iniciar Parf Gonodol",
+                "No fue posible abrir la interfaz gráfica ni el navegador web.\n"
+                "Revise el registro en %TEMP%\\parf_gonodol.log",
+            )
+            return
+
         try:
             while True:
                 time.sleep(1)

@@ -41,7 +41,7 @@ jobs:
         run: |
           uv venv .venv
           uv pip install --python .venv -r backend/requirements.txt
-          uv pip install --python .venv pyinstaller
+          uv pip install --python .venv pyinstaller pythonnet pyqt6 pyqt6-webengine
 
       - name: Compile Executable with PyInstaller
         shell: bash
@@ -55,6 +55,12 @@ jobs:
             --add-data "desktop/icon.png;desktop" \
             --add-data "desktop/icon.ico;desktop" \
             --add-data "desktop/icon.svg;desktop" \
+            --hidden-import "clr" \
+            --hidden-import "pythonnet" \
+            --hidden-import "webview.platforms.winforms" \
+            --hidden-import "webview.platforms.qt" \
+            --collect-all "webview" \
+            --collect-all "pythonnet" \
             desktop/entrypoint.py
 
       - name: Create Portable Zip
@@ -122,6 +128,8 @@ jobs:
             --add-data "frontend/dist:frontend/dist" \
             --add-data "desktop/icon.png:desktop" \
             --add-data "desktop/icon.svg:desktop" \
+            --hidden-import "webview.platforms.qt" \
+            --collect-all "webview" \
             desktop/entrypoint.py
           cd dist
           tar -czvf Parf-Gonodol-Linux.tar.gz Parf-Gonodol

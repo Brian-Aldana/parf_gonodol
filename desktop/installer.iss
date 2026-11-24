@@ -28,8 +28,8 @@ Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{
 Source: "dist\Parf-Gonodol\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
 
 [Icons]
-Name: "{autoprograms}\Parf Gonodol"; Filename: "{app}\Parf-Gonodol.exe"
-Name: "{autodesktop}\Parf Gonodol"; Filename: "{app}\Parf-Gonodol.exe"; Tasks: desktopicon
+Name: "{autoprograms}\Parf Gonodol"; Filename: "{app}\Parf-Gonodol.exe"; WorkingDir: "{app}"
+Name: "{autodesktop}\Parf Gonodol"; Filename: "{app}\Parf-Gonodol.exe"; WorkingDir: "{app}"; Tasks: desktopicon
 
 [Run]
 Filename: "{app}\Parf-Gonodol.exe"; Description: "{cm:LaunchProgram,Parf Gonodol}"; Flags: nowait postinstall skipifsilent
