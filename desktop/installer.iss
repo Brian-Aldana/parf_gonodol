@@ -2,7 +2,7 @@
 [Setup]
 AppId={{C78F9B60-7A0F-4B1C-8D15-18A7D7E69201}
 AppName=Parf Gonodol
-AppVersion=1.0.2
+AppVersion=2.0.0
 AppPublisher=Brian Aldana
 AppPublisherURL=https://github.com/Brian-Aldana/parf_gonodol
 AppSupportURL=https://github.com/Brian-Aldana/parf_gonodol
